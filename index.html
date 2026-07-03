@@ -10,34 +10,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#06080d;--bg-grad:#0a0e16;--panel:#101722;--panel2:#0b0f17;
-  --text:#eef2f7;--muted:#93a2b5;--line:#232c3a;--line-soft:#1a212c;
-  --accent:#3b82f6;--accent-soft:#1d4ed8;--accent-glow:rgba(59,130,246,.35);
+  --bg:#0a070f;--bg-grad:#0d0a17;--panel:#161027;--panel2:#0f0b19;
+  --text:#f0edf7;--muted:#a29ab3;--line:#2c2440;--line-soft:#211a30;
+  --accent:#8b5cf6;--accent-soft:#7c3aed;--accent-glow:rgba(139,92,246,.4);
   --good:#22c55e;--good-soft:rgba(34,197,94,.14);
   --bad:#ef4444;--bad-soft:rgba(239,68,68,.14);
   --warn:#f5a524;
-  --radius:12px;--radius-sm:8px;
-  --shadow-card:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.55);
-  --shadow-pop:0 4px 12px -4px rgba(0,0,0,.5),0 16px 40px -20px rgba(0,0,0,.6);
+  --radius:16px;--radius-sm:10px;
+  --shadow-card:0 1px 2px rgba(0,0,0,.4),0 8px 26px -12px rgba(0,0,0,.5),0 0 30px -18px rgba(139,92,246,.3);
+  --shadow-pop:0 4px 12px -4px rgba(0,0,0,.5),0 16px 42px -20px rgba(0,0,0,.55),0 0 44px -16px rgba(139,92,246,.35);
   --font-ui:"Inter",system-ui,-apple-system,Segoe UI,Arial,sans-serif;
   --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:radial-gradient(1200px 800px at 15% -10%,#0c1420 0%,var(--bg) 45%) fixed;color:var(--text);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;letter-spacing:.1px}
-header{padding:14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0b0f17,#090c12);display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
+html,body{margin:0;height:100%;background:radial-gradient(1200px 800px at 15% -10%,#180f2c 0%,var(--bg) 45%) fixed;color:var(--text);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;letter-spacing:.1px}
+header{padding:14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#130d20,#0e0916);display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
 header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent-glow),transparent)}
 .brandRow{display:flex;align-items:center;gap:10px}
-.brandMark{width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;box-shadow:0 4px 14px -4px var(--accent-glow);flex:0 0 auto}
-h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.1px;color:#fbfdff}
+.brandMark{width:30px;height:30px;border-radius:11px;background:linear-gradient(145deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;box-shadow:0 4px 16px -3px var(--accent-glow);flex:0 0 auto}
+h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.1px;color:#f9f6fe}
 .headSub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:500;letter-spacing:.2px}
 .liveBadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border:1px solid rgba(34,197,94,.3);border-radius:999px;padding:5px 10px 5px 8px;letter-spacing:.3px}
 .liveDot{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:livePulse 2s infinite}
 @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
 .wrap{display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px;height:calc(100vh - 62px)}
 .side{overflow:auto;border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-card)}
-.side::-webkit-scrollbar{width:9px}.side::-webkit-scrollbar-thumb{background:#26303f;border-radius:99px}.side::-webkit-scrollbar-track{background:transparent}
-.chartbox{border:1px solid var(--line);background:#04060a;border-radius:var(--radius);min-height:600px;position:relative;overflow:hidden;box-shadow:var(--shadow-card)}
-button{width:100%;padding:11px 14px;border:1px solid var(--accent-soft);border-radius:var(--radius-sm);background:linear-gradient(180deg,#4a8cf7,#2f6fe0);color:white;font-weight:700;font-size:13px;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.15) inset,0 6px 16px -8px var(--accent-glow);transition:filter .15s ease,transform .05s ease}
+.side::-webkit-scrollbar{width:9px}.side::-webkit-scrollbar-thumb{background:#332a45;border-radius:99px}.side::-webkit-scrollbar-track{background:transparent}
+.chartbox{border:1px solid var(--line);background:#0b0714;border-radius:var(--radius);min-height:600px;position:relative;overflow:hidden;box-shadow:var(--shadow-card)}
+button{width:100%;padding:11px 14px;border:1px solid var(--accent-soft);border-radius:var(--radius-sm);background:linear-gradient(180deg,#a78bfa,#7c3aed);color:white;font-weight:700;font-size:13px;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.15) inset,0 6px 18px -8px var(--accent-glow);transition:filter .15s ease,transform .05s ease}
 button:hover{filter:brightness(1.08)}
 button:active{transform:translateY(1px)}
 button:disabled{opacity:.55;cursor:not-allowed;filter:none}
@@ -55,16 +55,16 @@ button:disabled{opacity:.55;cursor:not-allowed;filter:none}
 .row>b{font-family:var(--font-mono);font-weight:600;font-size:13px;letter-spacing:.2px}
 .row>b.pos{color:var(--good)}.row>b.neg{color:var(--bad)}
 label{display:block;font-size:11px;color:var(--muted);margin:9px 0 4px;font-weight:600;letter-spacing:.2px;text-transform:uppercase}
-input,select{width:100%;padding:9px 10px;background:#060a10;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-ui);font-size:13px}
+input,select{width:100%;padding:9px 10px;background:#0d0a16;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-ui);font-size:13px}
 input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-.small{font-size:12px;color:#9fb0c3;line-height:1.5}.mono{font-family:var(--font-mono)}
+.small{font-size:12px;color:#b3a8c9;line-height:1.5}.mono{font-family:var(--font-mono)}
 .warn{color:var(--warn)}.good{color:var(--good)}
 #chart{width:100%;height:100%}
 .progressWrap{height:6px;background:#060a10;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:8px}.progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-soft),var(--accent));transition:width .15s ease}.progressText{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-mono)}.bandRow{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding:6px 0;font-size:12.5px}.bandRow:last-child{border-bottom:0}.bandRow b{font-family:var(--font-mono);font-weight:600}.bandName{display:flex;align-items:center;gap:7px;color:var(--muted)}.swatch{display:inline-block;width:14px;height:8px;border-radius:2px;flex:0 0 auto}
 
-.sideToggle{width:100%;padding:9px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0d1420;color:var(--muted);font-weight:600;font-size:12px;box-shadow:none}
-.sideToggle:hover{color:#d3dceb;background:#101a29}
-.sideShowToggle{display:none;width:auto;padding:8px 12px;margin:0;border:1px solid var(--line);border-bottom:0;border-radius:0 0 var(--radius-sm) 0;background:#0d1420;color:var(--muted);font-weight:700;font-size:15px;line-height:normal;box-shadow:none}
+.sideToggle{width:100%;padding:9px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#150f22;color:var(--muted);font-weight:600;font-size:12px;box-shadow:none}
+.sideToggle:hover{color:#ddd2ec;background:#1a1329}
+.sideShowToggle{display:none;width:auto;padding:8px 12px;margin:0;border:1px solid var(--line);border-bottom:0;border-radius:0 0 var(--radius-sm) 0;background:#150f22;color:var(--muted);font-weight:700;font-size:15px;line-height:normal;box-shadow:none}
 body.sideCollapsed .wrap{grid-template-columns:0 1fr}
 body.sideCollapsed .side{display:none}
 body.sideCollapsed .chartbox{grid-column:2}
@@ -72,29 +72,29 @@ body.sideCollapsed .sideShowToggle{display:inline-block}
 body.sideCollapsed .tabbar{padding-left:8px}
 
 
-.tabbar{display:flex;gap:2px;padding:0 10px;background:#04060a;border-bottom:1px solid var(--line);position:relative;z-index:3}
+.tabbar{display:flex;gap:2px;padding:0 10px;background:#0b0714;border-bottom:1px solid var(--line);position:relative;z-index:3}
 .tabbtn{width:auto;padding:12px 14px 10px;margin:0;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.1px;transition:color .15s ease,border-color .15s ease}
-.tabbtn:hover{color:#d3dceb}
+.tabbtn:hover{color:#ddd2ec}
 .tabbtn.active{background:transparent;color:#fff;border-bottom-color:var(--accent)}
 .tabpane{height:calc(100% - 42px);display:block;position:absolute;left:0;right:0;top:42px;bottom:0;visibility:hidden;pointer-events:none;z-index:1}
 .tabpane.active{visibility:visible;pointer-events:auto;z-index:2}
 #chart,#cqmChart{width:100%;height:100%}
-.cqmWrap{height:100%;padding:14px;background:#0a0f19;overflow:hidden}
+.cqmWrap{height:100%;padding:14px;background:#100a1c;overflow:hidden}
 .cqmHead{padding:2px 8px 10px}
 .cqmHead h2{font-size:16px;margin:0 0 6px;color:#fff;font-weight:700;letter-spacing:.1px}
 .cqmHead .desc{font-size:12.5px;color:var(--muted);font-style:normal;line-height:1.5}
 .cqmBadges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:flex-start}
 .cqmBadge{display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1.15;border-radius:999px;padding:4px 9px;border:1px solid currentColor;background:rgba(0,0,0,.15);white-space:nowrap;align-self:flex-start}
-.cqmBadge.buy{color:#24e572}.cqmBadge.acc{color:#b7ff2a}.cqmBadge.trim{color:#ffb000}.cqmBadge.sell{color:#ff5656}.cqmBadge.z{color:#e0f2fe}
-.cqmZToggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer}.cqmZToggle input{width:auto;margin:0;accent-color:#e0f2fe}
+.cqmBadge.buy{color:#24e572}.cqmBadge.acc{color:#b7ff2a}.cqmBadge.trim{color:#ffb000}.cqmBadge.sell{color:#ff5656}.cqmBadge.z{color:#ddd6fe}
+.cqmZToggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer}.cqmZToggle input{width:auto;margin:0;accent-color:#ddd6fe}
 .cqmBadgeStack{display:flex;flex-direction:column;gap:6px;align-items:flex-start;align-self:flex-start}
-.backtestLumpToggle{display:inline-flex;align-items:center;gap:7px;margin-top:9px;color:#dbeafe;font-size:12px;cursor:pointer}.backtestLumpToggle input{width:auto;margin:0;accent-color:#67e8a5}
+.backtestLumpToggle{display:inline-flex;align-items:center;gap:7px;margin-top:9px;color:#ede9fe;font-size:12px;cursor:pointer}.backtestLumpToggle input{width:auto;margin:0;accent-color:#67e8a5}
 .cqmPlotBox{height:calc(100% - 105px);min-height:430px}
 
 
 
 
-.backtestWrap{height:100%;padding:14px;background:#0a0f19;overflow:auto}
+.backtestWrap{height:100%;padding:14px;background:#100a1c;overflow:auto}
 .backtestHead{padding:2px 8px 10px}
 .backtestHead h2{font-size:16px;margin:0 0 6px;color:#fff;font-weight:700;letter-spacing:.1px}
 .backtestHead .desc{font-size:12.5px;color:var(--muted);font-style:normal;line-height:1.5;max-width:1100px}
@@ -102,12 +102,12 @@ body.sideCollapsed .tabbar{padding-left:8px}
 .backtestPanel,.backtestResults{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow-card)}
 .backtestPanel button{margin-top:10px;padding:10px}
 .backtestQuickRanges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
-.backtestQuickRanges button{width:auto;margin:0;padding:7px 9px;border:1px solid #344050;background:#0c1118;color:#dbeafe;font-size:12px;font-weight:800}
-.backtestQuickRanges button:hover{background:#162235}
-.backtestQuickRanges button.active{background:#2f81f7;color:#fff;border-color:#6da7ff;box-shadow:0 0 0 1px rgba(109,167,255,.35) inset}
+.backtestQuickRanges button{width:auto;margin:0;padding:7px 9px;border:1px solid #403450;background:#120d1c;color:#ede9fe;font-size:12px;font-weight:800}
+.backtestQuickRanges button:hover{background:#221935}
+.backtestQuickRanges button.active{background:#7c3aed;color:#fff;border-color:#a78bfa;box-shadow:0 0 0 1px rgba(167,139,250,.35) inset}
 .backtestDateMeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
-.backtestDateMeta label{margin:0;color:#b9c7d6}
-.backtestDateMeta span{font-size:11px;color:#8ea0b3;white-space:nowrap}
+.backtestDateMeta label{margin:0;color:#c3b8dc}
+.backtestDateMeta span{font-size:11px;color:#a79cc4;white-space:nowrap}
 .backtestDates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .backtestDateField label{margin-top:0}
 .backtestPanel input[type="text"],.backtestPanel input[type="date"]{font-size:14px;padding:10px;color-scheme:dark}
@@ -115,31 +115,38 @@ body.sideCollapsed .tabbar{padding-left:8px}
 .backtestMetric{border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:var(--radius-sm);padding:9px 11px;min-width:0}
 .backtestMetric .k{font-size:10.5px;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.4px}
 .backtestMetric .v{font-size:17px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-mono)}
-.backtestMetric .d{font-size:10px;color:#7d8ea3;margin-top:3px}
+.backtestMetric .d{font-size:10px;color:#8f83a3;margin-top:3px}
 .backtestMetric .v.pos,.backtestMetric .d.pos{color:var(--good)}
 .backtestMetric .v.neg,.backtestMetric .d.neg{color:var(--bad)}
-.backtestPlotBox{height:calc(100% - 255px);min-height:360px;margin:0 8px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0a0f19;overflow:hidden}
+.backtestPlotBox{height:calc(100% - 255px);min-height:360px;margin:0 8px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#100a1c;overflow:hidden}
 #backtestChart{width:100%;height:100%}
 .tabbar{overflow-x:auto;white-space:nowrap}
 @media(max-width:1100px){.backtestGrid{grid-template-columns:1fr}.backtestResults{grid-template-columns:repeat(2,minmax(130px,1fr))}.backtestPlotBox{height:430px}}
 @media(max-width:650px){.backtestResults{grid-template-columns:1fr}.backtestMetric .v{font-size:16px}.backtestPlotBox{height:380px;margin-left:0;margin-right:0}.backtestGrid{margin-left:0;margin-right:0}.backtestHead{padding-left:0;padding-right:0}.backtestDates{grid-template-columns:1fr}}
 
-.eqmChartHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:#04060a}
+.eqmChartHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:#0b0714}
 .eqmChartHead .titleBlock h2{font-size:14.5px;margin:0;color:#fff;font-weight:700;letter-spacing:.1px}
 .eqmChartHead .titleBlock .asOf{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)}
 .eqmLegendControl{display:flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);padding:6px 10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
-.eqmLegendControl:hover{color:#d3dceb;border-color:#2c3648}
+.eqmLegendControl:hover{color:#ddd2ec;border-color:#3a2e4d}
 .eqmLegendControl input{width:auto;margin:0;accent-color:var(--accent)}
 #chart{height:calc(100% - 47px)}
 
-.curveEditorBox{margin:10px 10px 4px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0a0f19;padding:10px}
+.curveEditorBox{margin:10px 10px 4px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#100a1c;padding:10px}
 .curveEditorBox svg{width:100%;height:auto;display:block;touch-action:none}
 .curveEditorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 8px 6px;flex-wrap:wrap}
 .curveEditorHead .small{color:var(--muted);font-size:12px}
-.curveResetBtn{width:auto;padding:7px 12px;margin:0;border:1px solid var(--line);border-radius:var(--radius-sm);background:#111a28;color:#e6edf3;font-weight:600;font-size:12px;cursor:pointer;box-shadow:none}
-.curveResetBtn:hover{background:#182335}
+.curveResetBtn{width:auto;padding:7px 12px;margin:0;border:1px solid var(--line);border-radius:var(--radius-sm);background:#1a1329;color:#f0ecf7;font-weight:600;font-size:12px;cursor:pointer;box-shadow:none}
+.curveResetBtn:hover{background:#241a35}
 .curveNode{cursor:grab}
 .curveNode:active{cursor:grabbing}
+
+.readmeBody{max-width:760px;margin:0 auto;padding:6px 10px 30px}
+.readmeBody h3{font-size:15px;color:#fff;margin:22px 0 8px;font-weight:700;letter-spacing:.1px}
+.readmeBody h3:first-child{margin-top:4px}
+.readmeBody p{font-size:13px;color:#c3ccd9;line-height:1.65;margin:0 0 12px}
+.disclaimerBox{border:1px solid rgba(245,165,36,.35);background:rgba(245,165,36,.08);border-radius:var(--radius-sm);padding:14px 16px;margin-top:4px}
+.disclaimerBox p{color:#e8c98a;margin-bottom:0}
 
 /* ---- Mobile layout ---- */
 @media(max-width:860px){
@@ -155,6 +162,7 @@ body.sideCollapsed .tabbar{padding-left:8px}
   body.sideCollapsed .chartbox{grid-column:1}
   .sideToggle,.sideShowToggle{display:none!important}
   .eqmChartHead{flex-wrap:wrap;row-gap:8px}
+  .tabbtn{padding:10px 9px 8px;font-size:11.5px}
   .cqmWrap{overflow:auto}
   .cqmPlotBox{min-height:340px}
   .backtestWrap{padding:10px}
@@ -210,22 +218,22 @@ body.sideCollapsed .tabbar{padding-left:8px}
   <b>Indicators</b>
   <div class="small" style="margin:6px 0 8px">Toggle which signals blend into Composite Risk/Z-score, which drive the CQM tab, the Accum/Dist Curve backtest, and Today's Action. Each enabled indicator is a weighted vote.</div>
   <div class="row" style="align-items:center">
-    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indPriceToggle" type="checkbox" checked style="width:auto;margin:0"/> Asymmetric Tail Curvature (price)</label>
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#f0ecf7"><input id="indPriceToggle" type="checkbox" checked style="width:auto;margin:0"/> Asymmetric Tail Curvature (price)</label>
   </div>
   <label>Weight</label>
   <input id="indPriceWeight" type="number" value="1" min="0" max="5" step="0.1"/>
   <div class="row" style="align-items:center;margin-top:8px">
-    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indSharpeToggle" type="checkbox" style="width:auto;margin:0"/> Sharpe (realized P/L, 14d EMA)</label>
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#f0ecf7"><input id="indSharpeToggle" type="checkbox" style="width:auto;margin:0"/> Sharpe (realized P/L, 14d EMA)</label>
   </div>
   <label>Weight</label>
   <input id="indSharpeWeight" type="number" value="1" min="0" max="5" step="0.1"/>
   <div class="row" style="align-items:center;margin-top:8px">
-    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indCbplToggle" type="checkbox" checked style="width:auto;margin:0"/> Cost Basis P/L (7d EMA)</label>
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#f0ecf7"><input id="indCbplToggle" type="checkbox" checked style="width:auto;margin:0"/> Cost Basis P/L (7d EMA)</label>
   </div>
   <label>Weight</label>
   <input id="indCbplWeight" type="number" value="1" min="0" max="5" step="0.1"/>
   <div class="row" style="align-items:center;margin-top:8px">
-    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indOnchainRiskToggle" type="checkbox" checked style="width:auto;margin:0"/> On-Chain Risk Composite</label>
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#f0ecf7"><input id="indOnchainRiskToggle" type="checkbox" checked style="width:auto;margin:0"/> On-Chain Risk Composite</label>
   </div>
   <label>Weight</label>
   <input id="indOnchainRiskWeight" type="number" value="1" min="0" max="5" step="0.1"/>
@@ -244,6 +252,7 @@ body.sideCollapsed .tabbar{padding-left:8px}
     <button id="eqmTabBtn" class="tabbtn active" type="button">EQM Rainbow</button>
     <button id="cqmTabBtn" class="tabbtn" type="button">CQM Risk</button>
     <button id="curveTabBtn" class="tabbtn" type="button">Accum/Dist Curve</button>
+    <button id="readmeTabBtn" class="tabbtn" type="button">Read Me</button>
   </div>
   <div id="eqmPane" class="tabpane active">
     <div class="eqmChartHead">
@@ -282,12 +291,12 @@ body.sideCollapsed .tabbar{padding-left:8px}
     <div class="backtestWrap">
       <div class="backtestHead">
         <h2>Accumulation / Distribution Curve</h2>
-        <div class="desc" style="color:#b9c7d6;font-size:12px;margin:2px 10px 0">Pure CQM Risk-driven model &mdash; no Z-score gate, no fixed-length tranches. Each day, the curve value at that day's risk level is the % of current cash bought (if positive) or % of current BTC sold (if negative). Drag the nodes to shape it.</div>
+        <div class="desc" style="color:#c3b8dc;font-size:12px;margin:2px 10px 0">Pure CQM Risk-driven model &mdash; no Z-score gate, no fixed-length tranches. Each day, the curve value at that day's risk level is the % of current cash bought (if positive) or % of current BTC sold (if negative). Drag the nodes to shape it.</div>
       </div>
       <div class="curveEditorHead">
         <span class="small">Drag a node up/down. X-axis = CQM Risk %, Y-axis = % of cash/BTC traded per day.</span>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b9c7d6;cursor:pointer;white-space:nowrap"><input id="curveLogToggle" type="checkbox"/> Log scale portfolio chart</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#c3b8dc;cursor:pointer;white-space:nowrap"><input id="curveLogToggle" type="checkbox"/> Log scale portfolio chart</label>
           <button id="curveResetBtn" class="curveResetBtn" type="button">Reset to default curve</button>
         </div>
       </div>
@@ -321,6 +330,26 @@ body.sideCollapsed .tabbar{padding-left:8px}
         </div>
       </div>
       <div class="backtestPlotBox"><div id="curveChart"></div></div>
+    </div>
+  </div>
+
+  <div id="readmePane" class="tabpane">
+    <div class="backtestWrap">
+      <div class="backtestHead">
+        <h2>Read Me</h2>
+        <div class="desc">What this tool does, how the model works, and the fine print.</div>
+      </div>
+      <div class="readmeBody">
+        <h3>How It Works</h3>
+        <p>BTC SDCA helps you decide how much to allocate to Bitcoin today, based on where the current price sits relative to its long-term historical growth trend and a set of underlying market health signals.</p>
+        <p>The model blends two layers. <b>Price valuation</b> compares Bitcoin's price against a statistically fitted long-term growth curve, with bands representing historical zones of relative under- and over-valuation. <b>On-chain signals</b> are a composite of market-cycle indicators &mdash; derived from realized profit/loss behavior and broader on-chain activity &mdash; that help confirm whether the current price zone reflects genuine accumulation or distribution behavior, not just short-term noise.</p>
+        <p>Each signal is converted to a common risk score and blended into a single Composite Risk reading. You control which signals are active and how heavily each is weighted, in the Indicators card. That score maps to a suggested allocation percentage via your own configurable Accumulation/Distribution Curve, which you can backtest against Bitcoin's full price history before trusting it with real capital.</p>
+        <p>The goal is to replace emotional, headline-driven buy/sell decisions with a consistent, rules-based framework &mdash; you set the rules once, and the model applies them the same way every day.</p>
+        <h3>Disclaimer</h3>
+        <div class="disclaimerBox">
+          <p><b>Not Financial Advice.</b> BTC SDCA is an educational and informational tool. It does not constitute financial, investment, tax, or legal advice, and nothing on this site should be interpreted as a recommendation to buy, sell, or hold any asset. The outputs shown (including &ldquo;Today's Action,&rdquo; risk scores, and backtested returns) are generated by a systematic model and reflect historical and current data &mdash; they are not predictions or guarantees of future performance. Cryptocurrency markets are highly volatile and you can lose some or all of your invested capital. We are not a registered investment advisor, broker-dealer, or financial institution. Always do your own research and consult a licensed financial professional before making investment decisions. Past performance, including any backtested results, does not guarantee future results.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1078,23 +1107,23 @@ function renderCqm(model){
     }
   ];
   const layout={
-    paper_bgcolor:"#0a0f19",
-    plot_bgcolor:"#0a0f19",
-    font:{color:"#dbeafe",family:"Inter, system-ui, sans-serif"},
+    paper_bgcolor:"#100a1c",
+    plot_bgcolor:"#100a1c",
+    font:{color:"#ede9fe",family:"Inter, system-ui, sans-serif"},
     margin:{l:70,r:86,t:20,b:45},
     hovermode:"closest",
     xaxis:{
       gridcolor:"rgba(255,255,255,.06)",
-      tickfont:{color:"#8ea3bd",size:11},
-      rangeslider:{visible:true,bgcolor:"#111a28",bordercolor:"#2c3648",borderwidth:1,thickness:.065}
+      tickfont:{color:"#a79cc4",size:11},
+      rangeslider:{visible:true,bgcolor:"#1a1329",bordercolor:"#3a2e4d",borderwidth:1,thickness:.065}
     },
     yaxis:{
       type:"log",
       title:"",
       tickprefix:"$",
       tickformat:"~s",
-      gridcolor:"rgba(34,90,140,.30)",
-      tickfont:{color:"#9bd1ff"},
+      gridcolor:"rgba(120,70,180,.30)",
+      tickfont:{color:"#c9b3ff"},
       zeroline:false
     },
     yaxis2:{
@@ -1105,8 +1134,8 @@ function renderCqm(model){
       range:[0,100],
       tickvals:[0,25,50,75,100],
       ticktext:["0%","25%","50%","75%","100%"],
-      tickfont:{color:"#b7d4f5"},
-      gridcolor:"rgba(16,77,102,.22)",
+      tickfont:{color:"#cbb8ea"},
+      gridcolor:"rgba(90,50,130,.22)",
       zeroline:false
     },
     yaxis3:{
@@ -1294,12 +1323,12 @@ function buildCurveEditorSvg(){
       stroke:isZero?"rgba(230,237,243,.55)":(isMajor?"rgba(255,255,255,.13)":"rgba(255,255,255,.05)"),
       "stroke-width":isZero?1.4:1}));
     if(isMajor){
-      const lbl=el("text",{x:CURVE_PAD_L-6,y:y+4,fill:"#8ea0b3","font-size":9,"text-anchor":"end"});
+      const lbl=el("text",{x:CURVE_PAD_L-6,y:y+4,fill:"#a79cc4","font-size":9,"text-anchor":"end"});
       lbl.textContent=(v>0?"+":"")+v+"%";
       svg.appendChild(lbl);
     }
   }
-  const yAxisLabel=el("text",{x:-(CURVE_SVG_H/2),y:14,fill:"#8ea0b3","font-size":10,"text-anchor":"middle",transform:"rotate(-90)"});
+  const yAxisLabel=el("text",{x:-(CURVE_SVG_H/2),y:14,fill:"#a79cc4","font-size":10,"text-anchor":"middle",transform:"rotate(-90)"});
   yAxisLabel.textContent="% of cash/BTC traded per day";
   svg.appendChild(yAxisLabel);
   for(const r of CURVE_RISK_NODES){
@@ -1308,19 +1337,19 @@ function buildCurveEditorSvg(){
     svg.appendChild(el("line",{x1:x,x2:x,y1:CURVE_PAD_T,y2:CURVE_PAD_T+CURVE_PLOT_H,
       stroke:isTenPct?"rgba(255,255,255,.09)":"rgba(255,255,255,.04)","stroke-width":1}));
     if(isTenPct){
-      const lbl=el("text",{x,y:CURVE_SVG_H-10,fill:"#8ea0b3","font-size":9,"text-anchor":"middle"});
+      const lbl=el("text",{x,y:CURVE_SVG_H-10,fill:"#a79cc4","font-size":9,"text-anchor":"middle"});
       lbl.textContent=r+"%";
       svg.appendChild(lbl);
     }
   }
-  const path=el("path",{d:"",fill:"none",stroke:"#6fd3ff","stroke-width":2.6});
+  const path=el("path",{d:"",fill:"none",stroke:"#a78bfa","stroke-width":2.6});
   svg.appendChild(path);
   const nodeCircles=[], nodeLabels=[];
   CURVE_RISK_NODES.forEach((r,i)=>{
-    const label=el("text",{x:curvePxX(r),y:0,fill:"#e6edf3","font-size":10,"font-weight":700,"text-anchor":"middle",opacity:0});
+    const label=el("text",{x:curvePxX(r),y:0,fill:"#f0ecf7","font-size":10,"font-weight":700,"text-anchor":"middle",opacity:0});
     svg.appendChild(label);
     nodeLabels.push(label);
-    const c=el("circle",{cx:curvePxX(r),cy:0,r:5,fill:"#6fd3ff",stroke:"#0c1118","stroke-width":1.5,class:"curveNode"});
+    const c=el("circle",{cx:curvePxX(r),cy:0,r:5,fill:"#a78bfa",stroke:"#120d1c","stroke-width":1.5,class:"curveNode"});
     c.dataset.idx=i;
     svg.appendChild(c);
     nodeCircles.push(c);
@@ -1374,7 +1403,7 @@ function redrawCurveEditor(){
     const x=curvePxX(r), y=curvePxY(curveNodeValues[i]);
     d += (i===0?"M":"L")+x+","+y+" ";
     nodeCircles[i].setAttribute("cy",y);
-    nodeCircles[i].setAttribute("fill", curveNodeValues[i]>0.05?"#24e572":(curveNodeValues[i]<-0.05?"#ff5656":"#8ea0b3"));
+    nodeCircles[i].setAttribute("fill", curveNodeValues[i]>0.05?"#24e572":(curveNodeValues[i]<-0.05?"#ff5656":"#a79cc4"));
     const isDragging=(i===curveDraggingIdx);
     const above = curveNodeValues[i] >= 0;
     nodeLabels[i].setAttribute("y", above ? y-10 : y+18);
@@ -1459,7 +1488,7 @@ function clearCurveResults(message="Fetch BTC data first."){
   for(const id of ["cvBuyDays","cvAvgBuy","cvReturn","cvAvgRisk","cvLumpReturn","cvVsLumpPct"]) setText(id,"—");
   setText("curveStatus",message);
   const el=document.getElementById("curveChart");
-  if(el && el.data) Plotly.react(el,[],{paper_bgcolor:"#0a0f19",plot_bgcolor:"#0a0f19"},{responsive:true,displaylogo:false,displayModeBar:false});
+  if(el && el.data) Plotly.react(el,[],{paper_bgcolor:"#100a1c",plot_bgcolor:"#100a1c"},{responsive:true,displaylogo:false,displayModeBar:false});
   curveRenderedKey=null;
 }
 let curveRenderedKey=null;
@@ -1602,14 +1631,14 @@ function runCurveBacktest(){
     {x:chartDates,y:btcClosePlot,type:"scatter",mode:"lines",name:"BTC close",line:{color:"rgba(255,255,255,.65)",width:1.4},hoverinfo:"skip",yaxis:"y2"}
   ];
   const layout={
-    paper_bgcolor:"#0a0f19",
-    plot_bgcolor:"#0a0f19",
-    font:{color:"#dbeafe",family:"Inter, system-ui, sans-serif"},
+    paper_bgcolor:"#100a1c",
+    plot_bgcolor:"#100a1c",
+    font:{color:"#ede9fe",family:"Inter, system-ui, sans-serif"},
     margin:{l:70,r:90,t:20,b:48},
     hovermode:"x unified",
-    xaxis:{range:[startStr, chartRows[chartRows.length-1]?.date || rows[rows.length-1].date],gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#8ea3bd",size:11},rangeslider:{visible:true,bgcolor:"#111a28",bordercolor:"#2c3648",borderwidth:1,thickness:.065}},
-    yaxis:{...(curveLogScale?{type:"log"}:{}),title:"USD",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#8ea3bd",size:11},zeroline:false},
-    yaxis2:{type:"log",overlaying:"y",side:"right",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(0,0,0,0)",tickfont:{color:"#e8edf5"},zeroline:false},
+    xaxis:{range:[startStr, chartRows[chartRows.length-1]?.date || rows[rows.length-1].date],gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#a79cc4",size:11},rangeslider:{visible:true,bgcolor:"#1a1329",bordercolor:"#3a2e4d",borderwidth:1,thickness:.065}},
+    yaxis:{...(curveLogScale?{type:"log"}:{}),title:"USD",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#a79cc4",size:11},zeroline:false},
+    yaxis2:{type:"log",overlaying:"y",side:"right",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(0,0,0,0)",tickfont:{color:"#f0ecf7"},zeroline:false},
     shapes:curveZoneShapes(chartRows,model),
     legend:{orientation:"h",x:0,y:1.1,bgcolor:"rgba(0,0,0,0)",font:{color:"#fff",size:11}},
     showlegend:true,
@@ -1635,13 +1664,16 @@ function scheduleCurveBacktest(delay=0){
 function setActiveTab(which){
   const isCqm=which==="cqm";
   const isCurve=which==="curve";
-  const isEqm=!isCqm && !isCurve;
+  const isReadme=which==="readme";
+  const isEqm=!isCqm && !isCurve && !isReadme;
   document.getElementById("eqmTabBtn")?.classList.toggle("active",isEqm);
   document.getElementById("cqmTabBtn")?.classList.toggle("active",isCqm);
   document.getElementById("curveTabBtn")?.classList.toggle("active",isCurve);
+  document.getElementById("readmeTabBtn")?.classList.toggle("active",isReadme);
   document.getElementById("eqmPane")?.classList.toggle("active",isEqm);
   document.getElementById("cqmPane")?.classList.toggle("active",isCqm);
   document.getElementById("curvePane")?.classList.toggle("active",isCurve);
+  document.getElementById("readmePane")?.classList.toggle("active",isReadme);
   if(isCurve){
     buildCurveEditorSvg();
     if(modelState){
@@ -1657,7 +1689,7 @@ function setActiveTab(which){
     }else{
       requestAnimationFrame(()=>renderCqm(modelState));
     }
-  }else{
+  }else if(isEqm){
     const chart=document.getElementById("chart");
     if(chart && chart.data) requestAnimationFrame(()=>Plotly.Plots.resize(chart));
   }
@@ -1760,11 +1792,11 @@ function render(model){
   const asOfEl=document.getElementById("eqmAsOf");
   if(asOfEl) asOfEl.textContent=`As of ${titleDate(model.data[model.data.length-1]?.t)} · live`;
   const layout={
-    paper_bgcolor:"#04060a",plot_bgcolor:"#04060a",font:{color:"#fff",family:"Inter, system-ui, sans-serif"},
+    paper_bgcolor:"#0b0714",plot_bgcolor:"#0b0714",font:{color:"#fff",family:"Inter, system-ui, sans-serif"},
     margin:{l:35,r:80,t:20,b:40},hovermode:"closest",
-    xaxis:{gridcolor:"rgba(255,255,255,.07)",tickfont:{color:"#9fb0c3",size:11}},
-    yaxis:{type:"log",side:"right",gridcolor:"rgba(255,255,255,.07)",tickprefix:"$",tickformat:"~s",tickfont:{color:"#9fb0c3",size:11}},
-    legend:{x:.82,y:.05,bgcolor:"rgba(10,14,22,.92)",bordercolor:"#232c3a",borderwidth:1,font:{size:11,color:"#dbe4f0"},tracegroupgap:0},
+    xaxis:{gridcolor:"rgba(255,255,255,.07)",tickfont:{color:"#b3a8c9",size:11}},
+    yaxis:{type:"log",side:"right",gridcolor:"rgba(255,255,255,.07)",tickprefix:"$",tickformat:"~s",tickfont:{color:"#b3a8c9",size:11}},
+    legend:{x:.82,y:.05,bgcolor:"rgba(16,10,22,.92)",bordercolor:"#2c2440",borderwidth:1,font:{size:11,color:"#e6ddf5"},tracegroupgap:0},
     shapes:[],annotations:[]
   };
   layout.showlegend=document.getElementById("legendToggle")?.checked ?? true;
@@ -1913,6 +1945,7 @@ window.addEventListener("resize",()=>{
 document.getElementById("eqmTabBtn").addEventListener("click",()=>setActiveTab("eqm"));
 document.getElementById("cqmTabBtn").addEventListener("click",()=>setActiveTab("cqm"));
 document.getElementById("curveTabBtn").addEventListener("click",()=>setActiveTab("curve"));
+document.getElementById("readmeTabBtn").addEventListener("click",()=>setActiveTab("readme"));
 document.getElementById("curveResetBtn")?.addEventListener("click",resetCurveToDefault);
 document.getElementById("curveLogToggle")?.addEventListener("change",e=>{
   curveLogScale=!!e.target.checked;
