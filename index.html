@@ -140,6 +140,31 @@ body.sideCollapsed .tabbar{padding-left:8px}
 .curveResetBtn:hover{background:#182335}
 .curveNode{cursor:grab}
 .curveNode:active{cursor:grabbing}
+
+/* ---- Mobile layout ---- */
+@media(max-width:860px){
+  html,body{height:auto;overflow-x:hidden;overflow-y:visible}
+  header{flex-wrap:wrap;gap:8px;padding:10px 14px}
+  h1{font-size:15px}
+  .headSub{font-size:10px}
+  .liveBadge{font-size:10px;padding:4px 9px 4px 7px}
+  .wrap{grid-template-columns:1fr;height:auto;padding:10px;gap:10px}
+  .chartbox{order:1;min-height:0;height:min(72vh,560px)}
+  .side{order:2;overflow:visible}
+  body.sideCollapsed .wrap{grid-template-columns:1fr}
+  body.sideCollapsed .chartbox{grid-column:1}
+  .sideToggle,.sideShowToggle{display:none!important}
+  .eqmChartHead{flex-wrap:wrap;row-gap:8px}
+  .cqmWrap{overflow:auto}
+  .cqmPlotBox{min-height:340px}
+  .backtestWrap{padding:10px}
+}
+@media(max-width:480px){
+  .actionLabel{font-size:16px}
+  .backtestMetric .v{font-size:15px}
+  .cqmBadges{gap:6px}
+  .cqmBadge{font-size:11px;padding:3px 8px}
+}
 </style>
 </head>
 <body>
@@ -1854,6 +1879,17 @@ function setSideCollapsed(collapsed){
 }
 document.getElementById("sideToggleBtn")?.addEventListener("click",()=>setSideCollapsed(true));
 document.getElementById("sideShowBtn")?.addEventListener("click",()=>setSideCollapsed(false));
+
+let resizeRAF=null;
+window.addEventListener("resize",()=>{
+  if(resizeRAF) cancelAnimationFrame(resizeRAF);
+  resizeRAF=requestAnimationFrame(()=>{
+    for(const id of ["chart","cqmChart","curveChart","backtestChart"]){
+      const el=document.getElementById(id);
+      if(el && el.data) Plotly.Plots.resize(el);
+    }
+  });
+});
 
 document.getElementById("eqmTabBtn").addEventListener("click",()=>setActiveTab("eqm"));
 document.getElementById("cqmTabBtn").addEventListener("click",()=>setActiveTab("cqm"));
