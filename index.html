@@ -316,6 +316,8 @@ body.sideCollapsed .tabbar{padding-left:8px}
           <div class="backtestMetric"><div class="k">Lump sum value</div><div id="cvLumpValue" class="v">—</div><div id="cvLumpReturn" class="d">—</div></div>
           <div class="backtestMetric"><div class="k">Portfolio vs lump sum</div><div id="cvVsLump" class="v">—</div><div id="cvVsLumpPct" class="d">—</div></div>
           <div class="backtestMetric"><div class="k">Cash reserve</div><div id="cvCash" class="v">—</div><div class="d">Includes curve sells</div></div>
+          <div class="backtestMetric"><div class="k">Max drawdown, your strategy</div><div id="cvMaxDD" class="v">—</div><div class="d">Peak-to-trough, portfolio value</div></div>
+          <div class="backtestMetric"><div class="k">Max drawdown, lump sum</div><div id="cvLumpMaxDD" class="v">—</div><div class="d">Peak-to-trough, buy-and-hold</div></div>
         </div>
       </div>
       <div class="backtestPlotBox"><div id="curveChart"></div></div>
@@ -1507,6 +1509,15 @@ function runCurveBacktest(){
   let buyDays=0, sellDays=0, noTradeDays=0, riskSum=0, riskCount=0, rateSum=0;
   const perDateAfterTrade=new Map();
 
+  // Max drawdown is peak-to-trough decline in portfolio value, tracked
+  // day-by-day alongside the trade simulation below -- computed for both
+  // the curve-driven strategy and a lump-sum buy-and-hold baseline (same
+  // starting capital, bought entirely on day 1) so the two are comparable.
+  const firstClose=rows[0].price;
+  const lumpBtc=startingCash/firstClose;
+  let stratPeak=startingCash, stratMaxDD=0;
+  let lumpPeak=startingCash, lumpMaxDD=0;
+
   for(const row of rows){
     const risk=compositeRiskAtIndex(model,row.idx);
     const rate=isFinite(risk) ? curveValueAtRisk(risk) : 0;
@@ -1527,7 +1538,13 @@ function runCurveBacktest(){
       }else noTradeDays++;
     }else noTradeDays++;
     if(isFinite(risk)){ riskSum+=risk; rateSum+=rate; riskCount++; }
-    perDateAfterTrade.set(row.date,{portfolio:cash+btc*row.price, deployed:netDeployed, cash, dailyTrade:trade, price:row.price, risk, rate});
+    const portfolioNow=cash+btc*row.price;
+    perDateAfterTrade.set(row.date,{portfolio:portfolioNow, deployed:netDeployed, cash, dailyTrade:trade, price:row.price, risk, rate});
+    if(portfolioNow>stratPeak) stratPeak=portfolioNow;
+    if(stratPeak>0){ const dd=(portfolioNow-stratPeak)/stratPeak; if(dd<stratMaxDD) stratMaxDD=dd; }
+    const lumpNow=lumpBtc*row.price;
+    if(lumpNow>lumpPeak) lumpPeak=lumpNow;
+    if(lumpPeak>0){ const dd=(lumpNow-lumpPeak)/lumpPeak; if(dd<lumpMaxDD) lumpMaxDD=dd; }
   }
 
   const latestPrice=rows[rows.length-1].price;
@@ -1538,8 +1555,6 @@ function runCurveBacktest(){
   const avgBuy=btcBoughtGross>0 ? grossBought/btcBoughtGross : NaN;
   const avgRisk=riskCount ? riskSum/riskCount : NaN;
   const avgRate=riskCount ? rateSum/riskCount : NaN;
-  const firstClose=rows[0].price;
-  const lumpBtc=startingCash/firstClose;
   const lumpValue=lumpBtc*latestPrice;
   const lumpPnl=lumpValue-startingCash;
   const lumpRet=100*lumpPnl/startingCash;
@@ -1566,6 +1581,10 @@ function runCurveBacktest(){
   setClassSign("cvVsLump",vsLump);
   setClassSign("cvVsLumpPct",vsLumpPct);
   setText("cvCash",usdExact(cash));
+  setText("cvMaxDD",pctExact(stratMaxDD*100));
+  setClassSign("cvMaxDD",stratMaxDD);
+  setText("cvLumpMaxDD",pctExact(lumpMaxDD*100));
+  setClassSign("cvLumpMaxDD",lumpMaxDD);
   setText("curveStatus","");
 
   const chartRows=rows;
