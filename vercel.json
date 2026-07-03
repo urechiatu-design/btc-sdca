@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/onchain-metrics.js": {
+      "maxDuration": 30
+    }
+  }
+}
