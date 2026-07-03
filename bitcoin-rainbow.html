@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BTC SDCA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080d;--bg-grad:#0a0e16;--panel:#101722;--panel2:#0b0f17;
+  --text:#eef2f7;--muted:#93a2b5;--line:#232c3a;--line-soft:#1a212c;
+  --accent:#3b82f6;--accent-soft:#1d4ed8;--accent-glow:rgba(59,130,246,.35);
+  --good:#22c55e;--good-soft:rgba(34,197,94,.14);
+  --bad:#ef4444;--bad-soft:rgba(239,68,68,.14);
+  --warn:#f5a524;
+  --radius:12px;--radius-sm:8px;
+  --shadow-card:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.55);
+  --shadow-pop:0 4px 12px -4px rgba(0,0,0,.5),0 16px 40px -20px rgba(0,0,0,.6);
+  --font-ui:"Inter",system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(1200px 800px at 15% -10%,#0c1420 0%,var(--bg) 45%) fixed;color:var(--text);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;letter-spacing:.1px}
+header{padding:14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0b0f17,#090c12);display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent-glow),transparent)}
+.brandRow{display:flex;align-items:center;gap:10px}
+.brandMark{width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;box-shadow:0 4px 14px -4px var(--accent-glow);flex:0 0 auto}
+h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.1px;color:#fbfdff}
+.headSub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:500;letter-spacing:.2px}
+.liveBadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--good);background:var(--good-soft);border:1px solid rgba(34,197,94,.3);border-radius:999px;padding:5px 10px 5px 8px;letter-spacing:.3px}
+.liveDot{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:livePulse 2s infinite}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.wrap{display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px;height:calc(100vh - 62px)}
+.side{overflow:auto;border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-card)}
+.side::-webkit-scrollbar{width:9px}.side::-webkit-scrollbar-thumb{background:#26303f;border-radius:99px}.side::-webkit-scrollbar-track{background:transparent}
+.chartbox{border:1px solid var(--line);background:#04060a;border-radius:var(--radius);min-height:600px;position:relative;overflow:hidden;box-shadow:var(--shadow-card)}
+button{width:100%;padding:11px 14px;border:1px solid var(--accent-soft);border-radius:var(--radius-sm);background:linear-gradient(180deg,#4a8cf7,#2f6fe0);color:white;font-weight:700;font-size:13px;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.15) inset,0 6px 16px -8px var(--accent-glow);transition:filter .15s ease,transform .05s ease}
+button:hover{filter:brightness(1.08)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.55;cursor:not-allowed;filter:none}
+.card{border:1px solid var(--line);background:var(--panel2);border-radius:var(--radius);margin-top:10px;padding:13px;box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+.card>b{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.actionBox{margin-top:9px;padding:12px;border-radius:var(--radius-sm);border:1px solid var(--line);background:rgba(255,255,255,.02);text-align:center}
+.actionLabel{font-family:var(--font-mono);font-size:19px;font-weight:700;letter-spacing:.3px;color:var(--text)}
+.actionLabel.buy{color:var(--good)}
+.actionLabel.sell{color:var(--bad)}
+.actionLabel.hold{color:var(--muted)}
+#todaysActionCard .actionBox.buy{border-color:rgba(34,197,94,.35);background:var(--good-soft)}
+#todaysActionCard .actionBox.sell{border-color:rgba(239,68,68,.35);background:var(--bad-soft)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line-soft);padding:8px 0;font-size:13px}.row:last-child{border-bottom:0}
+.row>span{color:var(--muted);font-size:12.5px}
+.row>b{font-family:var(--font-mono);font-weight:600;font-size:13px;letter-spacing:.2px}
+.row>b.pos{color:var(--good)}.row>b.neg{color:var(--bad)}
+label{display:block;font-size:11px;color:var(--muted);margin:9px 0 4px;font-weight:600;letter-spacing:.2px;text-transform:uppercase}
+input,select{width:100%;padding:9px 10px;background:#060a10;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-ui);font-size:13px}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.small{font-size:12px;color:#9fb0c3;line-height:1.5}.mono{font-family:var(--font-mono)}
+.warn{color:var(--warn)}.good{color:var(--good)}
+#chart{width:100%;height:100%}
+.progressWrap{height:6px;background:#060a10;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:8px}.progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-soft),var(--accent));transition:width .15s ease}.progressText{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-mono)}.bandRow{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding:6px 0;font-size:12.5px}.bandRow:last-child{border-bottom:0}.bandRow b{font-family:var(--font-mono);font-weight:600}.bandName{display:flex;align-items:center;gap:7px;color:var(--muted)}.swatch{display:inline-block;width:14px;height:8px;border-radius:2px;flex:0 0 auto}
+
+.sideToggle{width:100%;padding:9px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0d1420;color:var(--muted);font-weight:600;font-size:12px;box-shadow:none}
+.sideToggle:hover{color:#d3dceb;background:#101a29}
+.sideShowToggle{display:none;width:auto;padding:8px 12px;margin:0;border:1px solid var(--line);border-bottom:0;border-radius:0 0 var(--radius-sm) 0;background:#0d1420;color:var(--muted);font-weight:700;font-size:15px;line-height:normal;box-shadow:none}
+body.sideCollapsed .wrap{grid-template-columns:0 1fr}
+body.sideCollapsed .side{display:none}
+body.sideCollapsed .chartbox{grid-column:2}
+body.sideCollapsed .sideShowToggle{display:inline-block}
+body.sideCollapsed .tabbar{padding-left:8px}
+
+
+.tabbar{display:flex;gap:2px;padding:0 10px;background:#04060a;border-bottom:1px solid var(--line);position:relative;z-index:3}
+.tabbtn{width:auto;padding:12px 14px 10px;margin:0;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.1px;transition:color .15s ease,border-color .15s ease}
+.tabbtn:hover{color:#d3dceb}
+.tabbtn.active{background:transparent;color:#fff;border-bottom-color:var(--accent)}
+.tabpane{height:calc(100% - 42px);display:block;position:absolute;left:0;right:0;top:42px;bottom:0;visibility:hidden;pointer-events:none;z-index:1}
+.tabpane.active{visibility:visible;pointer-events:auto;z-index:2}
+#chart,#cqmChart{width:100%;height:100%}
+.cqmWrap{height:100%;padding:14px;background:#0a0f19;overflow:hidden}
+.cqmHead{padding:2px 8px 10px}
+.cqmHead h2{font-size:16px;margin:0 0 6px;color:#fff;font-weight:700;letter-spacing:.1px}
+.cqmHead .desc{font-size:12.5px;color:var(--muted);font-style:normal;line-height:1.5}
+.cqmBadges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:flex-start}
+.cqmBadge{display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1.15;border-radius:999px;padding:4px 9px;border:1px solid currentColor;background:rgba(0,0,0,.15);white-space:nowrap;align-self:flex-start}
+.cqmBadge.buy{color:#24e572}.cqmBadge.acc{color:#b7ff2a}.cqmBadge.trim{color:#ffb000}.cqmBadge.sell{color:#ff5656}.cqmBadge.z{color:#e0f2fe}
+.cqmZToggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer}.cqmZToggle input{width:auto;margin:0;accent-color:#e0f2fe}
+.cqmBadgeStack{display:flex;flex-direction:column;gap:6px;align-items:flex-start;align-self:flex-start}
+.backtestLumpToggle{display:inline-flex;align-items:center;gap:7px;margin-top:9px;color:#dbeafe;font-size:12px;cursor:pointer}.backtestLumpToggle input{width:auto;margin:0;accent-color:#67e8a5}
+.cqmPlotBox{height:calc(100% - 105px);min-height:430px}
+
+
+
+
+.backtestWrap{height:100%;padding:14px;background:#0a0f19;overflow:auto}
+.backtestHead{padding:2px 8px 10px}
+.backtestHead h2{font-size:16px;margin:0 0 6px;color:#fff;font-weight:700;letter-spacing:.1px}
+.backtestHead .desc{font-size:12.5px;color:var(--muted);font-style:normal;line-height:1.5;max-width:1100px}
+.backtestGrid{display:grid;grid-template-columns:minmax(230px,310px) 1fr;gap:12px;align-items:start;margin:4px 8px 12px}
+.backtestPanel,.backtestResults{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow-card)}
+.backtestPanel button{margin-top:10px;padding:10px}
+.backtestQuickRanges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.backtestQuickRanges button{width:auto;margin:0;padding:7px 9px;border:1px solid #344050;background:#0c1118;color:#dbeafe;font-size:12px;font-weight:800}
+.backtestQuickRanges button:hover{background:#162235}
+.backtestQuickRanges button.active{background:#2f81f7;color:#fff;border-color:#6da7ff;box-shadow:0 0 0 1px rgba(109,167,255,.35) inset}
+.backtestDateMeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.backtestDateMeta label{margin:0;color:#b9c7d6}
+.backtestDateMeta span{font-size:11px;color:#8ea0b3;white-space:nowrap}
+.backtestDates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.backtestDateField label{margin-top:0}
+.backtestPanel input[type="text"],.backtestPanel input[type="date"]{font-size:14px;padding:10px;color-scheme:dark}
+.backtestResults{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:8px}
+.backtestMetric{border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:var(--radius-sm);padding:9px 11px;min-width:0}
+.backtestMetric .k{font-size:10.5px;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.4px}
+.backtestMetric .v{font-size:17px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-mono)}
+.backtestMetric .d{font-size:10px;color:#7d8ea3;margin-top:3px}
+.backtestMetric .v.pos,.backtestMetric .d.pos{color:var(--good)}
+.backtestMetric .v.neg,.backtestMetric .d.neg{color:var(--bad)}
+.backtestPlotBox{height:calc(100% - 255px);min-height:360px;margin:0 8px 8px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0a0f19;overflow:hidden}
+#backtestChart{width:100%;height:100%}
+.tabbar{overflow-x:auto;white-space:nowrap}
+@media(max-width:1100px){.backtestGrid{grid-template-columns:1fr}.backtestResults{grid-template-columns:repeat(2,minmax(130px,1fr))}.backtestPlotBox{height:430px}}
+@media(max-width:650px){.backtestResults{grid-template-columns:1fr}.backtestMetric .v{font-size:16px}.backtestPlotBox{height:380px;margin-left:0;margin-right:0}.backtestGrid{margin-left:0;margin-right:0}.backtestHead{padding-left:0;padding-right:0}.backtestDates{grid-template-columns:1fr}}
+
+.eqmChartHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:#04060a}
+.eqmChartHead .titleBlock h2{font-size:14.5px;margin:0;color:#fff;font-weight:700;letter-spacing:.1px}
+.eqmChartHead .titleBlock .asOf{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)}
+.eqmLegendControl{display:flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);padding:6px 10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
+.eqmLegendControl:hover{color:#d3dceb;border-color:#2c3648}
+.eqmLegendControl input{width:auto;margin:0;accent-color:var(--accent)}
+#chart{height:calc(100% - 47px)}
+
+.curveEditorBox{margin:10px 10px 4px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0a0f19;padding:10px}
+.curveEditorBox svg{width:100%;height:auto;display:block;touch-action:none}
+.curveEditorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 8px 6px;flex-wrap:wrap}
+.curveEditorHead .small{color:var(--muted);font-size:12px}
+.curveResetBtn{width:auto;padding:7px 12px;margin:0;border:1px solid var(--line);border-radius:var(--radius-sm);background:#111a28;color:#e6edf3;font-weight:600;font-size:12px;cursor:pointer;box-shadow:none}
+.curveResetBtn:hover{background:#182335}
+.curveNode{cursor:grab}
+.curveNode:active{cursor:grabbing}
+</style>
+</head>
+<body>
+<header>
+<div class="brandRow">
+  <div class="brandMark">₿</div>
+  <div>
+    <h1>BTC SDCA</h1>
+    <div class="headSub">Systematic DCA · on-chain &amp; price valuation model</div>
+  </div>
+</div>
+<div class="liveBadge"><span class="liveDot"></span>Live</div>
+</header>
+<div class="wrap">
+<aside class="side">
+<button id="sideToggleBtn" class="sideToggle" type="button">Hide menu</button>
+<button id="loadBtn">Refresh BTC Data</button>
+<div class="card small" id="status">Auto-loading live BTC data…<div class="progressWrap"><div id="progressBar" class="progressBar"></div></div><div id="progressText" class="progressText">0%</div></div>
+
+<div class="card">
+  <div class="row"><b>Price</b><b id="mPrice">—</b></div>
+  <div class="row"><span>EQM 50%</span><b id="mEq">—</b></div>
+  <div class="row"><span>Q1% rail</span><b id="mLowRail">—</b></div>
+  <div class="row"><span>Q99% rail</span><b id="mHighRail">—</b></div>
+  <div class="row"><span>EQM Risk</span><b id="mRisk">—</b></div>
+  <div class="row"><span>CQM Risk</span><b id="mCqmRisk">—</b></div>
+  <div class="row"><span>EQM Z-score</span><b id="mZScore">—</b></div>
+  <div class="row"><span>CQM Z-score</span><b id="mCqmZScore">—</b></div>
+  <div class="row"><span>Composite Risk</span><b id="mCompositeRisk">—</b></div>
+  <div class="row"><span>Composite Z-score</span><b id="mCompositeZScore">—</b></div>
+  <div class="row"><span>Current band</span><b id="mBand">—</b></div>
+</div>
+
+<div class="card" id="todaysActionCard">
+  <b>Today's Action</b>
+  <div class="actionBox">
+    <div id="actionLabel" class="actionLabel">—</div>
+    <div id="actionSub" class="small" style="margin-top:4px">—</div>
+  </div>
+</div>
+
+<div class="card">
+  <b>Indicators</b>
+  <div class="small" style="margin:6px 0 8px">Toggle which signals blend into Composite Risk/Z-score, which drive the CQM tab, the Accum/Dist Curve backtest, and Today's Action. Each enabled indicator is a weighted vote.</div>
+  <div class="row" style="align-items:center">
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indPriceToggle" type="checkbox" checked style="width:auto;margin:0"/> Asymmetric Tail Curvature (price)</label>
+  </div>
+  <label>Weight</label>
+  <input id="indPriceWeight" type="number" value="1" min="0" max="5" step="0.1"/>
+  <div class="row" style="align-items:center;margin-top:8px">
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indSharpeToggle" type="checkbox" style="width:auto;margin:0"/> Sharpe (realized P/L, 14d EMA)</label>
+  </div>
+  <label>Weight</label>
+  <input id="indSharpeWeight" type="number" value="1" min="0" max="5" step="0.1"/>
+  <div class="row" style="align-items:center;margin-top:8px">
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indCbplToggle" type="checkbox" checked style="width:auto;margin:0"/> Cost Basis P/L (7d EMA)</label>
+  </div>
+  <label>Weight</label>
+  <input id="indCbplWeight" type="number" value="1" min="0" max="5" step="0.1"/>
+  <div class="row" style="align-items:center;margin-top:8px">
+    <label style="display:flex;align-items:center;gap:7px;margin:0;font-size:13px;color:#e6edf3"><input id="indOnchainRiskToggle" type="checkbox" checked style="width:auto;margin:0"/> On-Chain Risk Composite</label>
+  </div>
+  <label>Weight</label>
+  <input id="indOnchainRiskWeight" type="number" value="1" min="0" max="5" step="0.1"/>
+</div>
+
+
+<div class="card">
+  <b>Live band levels</b>
+  <div id="bandList" class="small"></div>
+</div>
+
+</aside>
+<main class="chartbox">
+  <div class="tabbar">
+    <button id="sideShowBtn" class="sideShowToggle" type="button" title="Show menu" aria-label="Show menu">›</button>
+    <button id="eqmTabBtn" class="tabbtn active" type="button">EQM Rainbow</button>
+    <button id="cqmTabBtn" class="tabbtn" type="button">CQM Risk</button>
+    <button id="curveTabBtn" class="tabbtn" type="button">Accum/Dist Curve</button>
+  </div>
+  <div id="eqmPane" class="tabpane active">
+    <div class="eqmChartHead">
+      <div class="titleBlock">
+        <h2>Asymmetric Tail Curvature Rainbow</h2>
+        <div id="eqmAsOf" class="asOf">—</div>
+      </div>
+      <label class="eqmLegendControl">
+        <input id="legendToggle" type="checkbox" checked/> Show legend
+      </label>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <div id="cqmPane" class="tabpane">
+    <div class="cqmWrap">
+      <div class="cqmHead">
+        <h2>CQM Risk</h2>
+        <div class="desc">CQM Risk is valuation risk, not DCA allocation. Low risk = cheaper / more buyable; high risk = expensive / less buyable.</div>
+        <div class="cqmBadges">
+          <div class="cqmBadgeStack">
+            <span class="cqmBadge buy">0–25% Buy zone</span>
+            <label class="cqmBadge z cqmZToggle"><input id="cqmZToggle" type="checkbox" checked/> Show Z line</label>
+          </div>
+          <span class="cqmBadge acc">25–50% Accumulate</span>
+          <span class="cqmBadge trim">50–75% Trim</span>
+          <span class="cqmBadge sell">75–100% Sell zone</span>
+          <span id="cqmZBadge" class="cqmBadge z">Z-score</span>
+        </div>
+      </div>
+      <div class="cqmPlotBox"><div id="cqmChart"></div></div>
+    </div>
+  </div>
+
+  <div id="curvePane" class="tabpane">
+    <div class="backtestWrap">
+      <div class="backtestHead">
+        <h2>Accumulation / Distribution Curve</h2>
+        <div class="desc" style="color:#b9c7d6;font-size:12px;margin:2px 10px 0">Pure CQM Risk-driven model &mdash; no Z-score gate, no fixed-length tranches. Each day, the curve value at that day's risk level is the % of current cash bought (if positive) or % of current BTC sold (if negative). Drag the nodes to shape it.</div>
+      </div>
+      <div class="curveEditorHead">
+        <span class="small">Drag a node up/down. X-axis = CQM Risk %, Y-axis = % of cash/BTC traded per day.</span>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b9c7d6;cursor:pointer;white-space:nowrap"><input id="curveLogToggle" type="checkbox"/> Log scale portfolio chart</label>
+          <button id="curveResetBtn" class="curveResetBtn" type="button">Reset to default curve</button>
+        </div>
+      </div>
+      <div class="curveEditorBox">
+        <svg id="curveEditorSvg" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <div class="backtestGrid">
+        <div class="backtestPanel">
+          <div class="backtestDates" style="grid-template-columns:1fr">
+            <div class="backtestDateField">
+              <div class="backtestDateMeta"><label for="curveStartInput">Starting date</label></div>
+              <input id="curveStartInput" type="text" inputmode="numeric" autocomplete="off" maxlength="10" value="2015-01-01" placeholder="YYYY-MM-DD"/>
+            </div>
+          </div>
+          <label>Starting capital, USD</label>
+          <input id="curveCashInput" type="number" value="10000" min="0" step="100"/>
+          <div id="curveStatus" class="small" style="margin-top:8px">Fetch BTC data first.</div>
+        </div>
+        <div class="backtestResults">
+          <div class="backtestMetric"><div class="k">Backtest days</div><div id="cvDays" class="v">—</div><div id="cvBuyDays" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Starting capital</div><div id="cvStartingCash" class="v">—</div><div class="d"></div></div>
+          <div class="backtestMetric"><div class="k">Net BTC position</div><div id="cvBtc" class="v">—</div><div id="cvAvgBuy" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Current portfolio value</div><div id="cvBtcValue" class="v">—</div><div class="d">BTC+Cash</div></div>
+          <div class="backtestMetric"><div class="k">P/L</div><div id="cvPnl" class="v">—</div><div id="cvReturn" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Avg daily rate</div><div id="cvAvgRate" class="v">—</div><div id="cvAvgRisk" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Lump sum value</div><div id="cvLumpValue" class="v">—</div><div id="cvLumpReturn" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Portfolio vs lump sum</div><div id="cvVsLump" class="v">—</div><div id="cvVsLumpPct" class="d">—</div></div>
+          <div class="backtestMetric"><div class="k">Cash reserve</div><div id="cvCash" class="v">—</div><div class="d">Includes curve sells</div></div>
+        </div>
+      </div>
+      <div class="backtestPlotBox"><div id="curveChart"></div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+const GENESIS = Date.UTC(2009,0,3);
+const ONE_DAY = 86400000;
+const HALVINGS = [
+  Date.UTC(2012,10,28),
+  Date.UTC(2016,6,9),
+  Date.UTC(2020,4,11),
+  Date.UTC(2024,3,20),
+  Date.UTC(2028,2,28)
+];
+function gaussian(x,mu,sigma){ const z=(x-mu)/sigma; return Math.exp(-0.5*z*z); }
+function cycleBasisFromTime(ms){
+  // Objective halving-cycle phase features. They use only known protocol dates,
+  // not BTC price or screenshot targets.
+  let bull=0, bear=0;
+  for(const h of HALVINGS){
+    const ageYears=(ms-h)/(365.25*ONE_DAY);
+    bull += gaussian(ageYears,1.18,0.78);
+    bear += gaussian(ageYears,2.35,0.88);
+  }
+  return [bull,bear];
+}
+let modelState = null;
+let cqmRenderedModel = null;
+let backtestRenderedKey = null;
+function setProgress(p,msg){
+  const bar=document.getElementById("progressBar");
+  const txt=document.getElementById("progressText");
+  const st=document.getElementById("status");
+  const pctVal=Math.max(0,Math.min(100,Number(p)||0));
+  if(bar) bar.style.width=pctVal.toFixed(1)+"%";
+  if(txt) txt.textContent=pctVal.toFixed(1)+"%";
+  if(st && msg){
+    const wrap=st.querySelector(".progressWrap");
+    const label=st.querySelector(".progressText");
+    st.childNodes[0].nodeValue=msg;
+  }
+}
+function rollingMax(arr,len){
+  const out=[];
+  for(let i=0;i<arr.length;i++){ let m=-Infinity; const s=Math.max(0,i-len+1); for(let j=s;j<=i;j++) if(arr[j]>m)m=arr[j]; out.push(m); }
+  return out;
+}
+function rollingStd(arr,len){
+  const out=[];
+  for(let i=0;i<arr.length;i++){
+    const s=Math.max(1,i-len+1); let n=0,mean=0,m2=0;
+    for(let j=s;j<=i;j++){ const v=arr[j]; if(isFinite(v)){n++; const d=v-mean; mean+=d/n; m2+=d*(v-mean);} }
+    out.push(n>2?Math.sqrt(m2/(n-1)):0);
+  }
+  return out;
+}
+function robustZ(arr){
+  const m=median(arr), mad=median(arr.map(v=>Math.abs(v-m)))||1;
+  return arr.map(v=>(v-m)/(1.4826*mad));
+}
+
+
+function isoDayUTC(value){
+  const d = value instanceof Date ? value : new Date(value);
+  if(!isFinite(d.getTime())) return "";
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth()+1).padStart(2,"0");
+  const day = String(d.getUTCDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function titleDate(value){
+  const d = value instanceof Date ? value : new Date(value);
+  if(!isFinite(d.getTime())) return "live";
+  return d.toLocaleDateString(undefined,{timeZone:"UTC",year:"numeric",month:"long",day:"numeric"});
+}
+function hoverDate(value){
+  const d = value instanceof Date ? value : new Date(value);
+  if(!isFinite(d.getTime())) return "";
+  return d.toLocaleDateString(undefined,{timeZone:"UTC",year:"numeric",month:"short",day:"numeric"});
+}
+
+function usd(v){ if(!isFinite(v)) return "—"; if(v>=1e6) return "$"+(v/1e6).toFixed(2)+"M"; if(v>=1e3) return "$"+(v/1e3).toFixed(v>=100e3?0:1)+"K"; return "$"+v.toFixed(0); }
+function usdExact(v){
+  if(!isFinite(v)) return "—";
+  return "$" + v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pct(v){ return isFinite(v)?v.toFixed(1)+"%":"—"; }
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function median(a){const b=a.filter(Number.isFinite).slice().sort((x,y)=>x-y); const n=b.length; return n? (n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2):NaN;}
+function weightedQuantile(values, weights, q){
+  return weightedQuantiles(values, weights, [q])[0];
+}
+function weightedQuantiles(values, weights, qs){
+  const arr=[]; let total=0;
+  for(let i=0;i<values.length;i++){
+    if(isFinite(values[i])&&isFinite(weights[i])&&weights[i]>0){
+      arr.push([values[i],weights[i]]);
+      total+=weights[i];
+    }
+  }
+  if(!arr.length) return qs.map(()=>NaN);
+  arr.sort((a,b)=>a[0]-b[0]);
+  const targets=qs.map((q,idx)=>({q,idx,target:q*total})).sort((a,b)=>a.target-b.target);
+  const ans=Array(qs.length).fill(arr[arr.length-1][0]);
+  let acc=0, ti=0;
+  for(const [v,w] of arr){
+    acc+=w;
+    while(ti<targets.length && acc>=targets[ti].target){
+      ans[targets[ti].idx]=v;
+      ti++;
+    }
+    if(ti>=targets.length) break;
+  }
+  return ans;
+}
+function solveLinear(A,b){
+  const n=b.length, M=A.map((r,i)=>r.concat([b[i]]));
+  for(let i=0;i<n;i++){
+    let piv=i; for(let r=i+1;r<n;r++) if(Math.abs(M[r][i])>Math.abs(M[piv][i])) piv=r;
+    [M[i],M[piv]]=[M[piv],M[i]];
+    const d=M[i][i] || 1e-12;
+    for(let c=i;c<=n;c++) M[i][c]/=d;
+    for(let r=0;r<n;r++) if(r!==i){ const f=M[r][i]; for(let c=i;c<=n;c++) M[r][c]-=f*M[i][c];}
+  }
+  return M.map(r=>r[n]);
+}
+function ridgeHuberFit(X,y,lambda=0.015,iters=18){
+  const n=y.length, p=X[0].length; let beta=Array(p).fill(0);
+  const medY=median(y), madY=median(y.map(v=>Math.abs(v-medY)))||1;
+  beta[0]=medY;
+  for(let it=0;it<iters;it++){
+    const res=y.map((yy,i)=>yy-X[i].reduce((s,x,j)=>s+x*beta[j],0));
+    const s=(median(res.map(Math.abs))||madY)*1.4826;
+    const k=1.345*s;
+    const A=Array.from({length:p},()=>Array(p).fill(0)), B=Array(p).fill(0);
+    for(let i=0;i<n;i++){
+      const r=Math.abs(res[i]); const w=r<=k?1:k/(r||1e-12);
+      for(let a=0;a<p;a++){ B[a]+=w*X[i][a]*y[i]; for(let c=0;c<p;c++) A[a][c]+=w*X[i][a]*X[i][c];}
+    }
+    for(let j=1;j<p;j++) A[j][j]+=lambda*n;
+    beta=solveLinear(A,B);
+  }
+  return beta;
+}
+function makeFeatures(x){
+  return [1, x, x*x, Math.sqrt(Math.max(x,1e-9))];
+}
+async function kernelStats(xs,res,gridX,state,onProgress=null){
+  const n=xs.length;
+  const sx=Math.sqrt(xs.reduce((s,v)=>s+(v-median(xs))**2,0)/n);
+  const hAge=Math.max(0.10, 1.06*sx*Math.pow(n,-0.2)); // fixed Silverman age bandwidth
+  const qs=[.01,.10,.20,.30,.40,.50,.60,.70,.80,.90,.99];
+  const out={};
+  for(const q of qs) out[q]=[];
+  const lowRail=[], highRail=[];
+  for(let gi=0; gi<gridX.length; gi++){
+    const gx=gridX[gi], gs=state[gi] || [0,0,0,0,0,0];
+    const w=new Array(n);
+    for(let i=0;i<n;i++){
+      const si=state[i] || [0,0,0,0,0,0];
+      const dx=(xs[i]-gx)/hAge;
+      const dDraw=((si[0]||0)-(gs[0]||0))/1.15;
+      const dMom =((si[1]||0)-(gs[1]||0))/1.25;
+      const dVol =((si[2]||0)-(gs[2]||0))/1.35;
+      const dVoV =((si[3]||0)-(gs[3]||0))/1.65;
+      const dBull=((si[4]||0)-(gs[4]||0))/2.65;
+      const dBear=((si[5]||0)-(gs[5]||0))/2.85;
+      // Broad conditional residual distribution:
+      // age dominates; drawdown/momentum/volatility refine the distribution;
+      // halving-cycle terms are weak objective priors. No target prices or
+      // current-price anchoring are used.
+      const dist =
+        dx*dx +
+        0.40*dDraw*dDraw +
+        0.25*dMom*dMom +
+        0.16*dVol*dVol +
+        0.07*dVoV*dVoV +
+        0.045*dBull*dBull +
+        0.035*dBear*dBear;
+      w[i]=Math.exp(-0.5*dist);
+    }
+    const qArr=weightedQuantiles(res,w,qs);
+    const qVals={};
+    for(let qi=0; qi<qs.length; qi++){ qVals[qs[qi]]=qArr[qi]; out[qs[qi]].push(qArr[qi]); }
+    // EVT-style rails from quantile spacing. Fixed multipliers; no screenshot anchors.
+    const loSpread = Math.max(1e-6, qVals[.10]-qVals[.01]);
+    const hiSpread = Math.max(1e-6, qVals[.99]-qVals[.90]);
+    lowRail.push(qVals[.01] - 0.85*loSpread);
+    highRail.push(qVals[.99] + 0.65*hiSpread);
+    if(onProgress && (gi%10===0 || gi===gridX.length-1)) {
+      onProgress(55 + 40*(gi+1)/gridX.length, `Building conditional quantile surface… ${gi+1}/${gridX.length}`);
+      await new Promise(requestAnimationFrame);
+    }
+  }
+  out.lowRail=lowRail; out.highRail=highRail; return out;
+}
+function interp(xs,ys,x){
+  if(x<=xs[0]) return ys[0]; if(x>=xs[xs.length-1]) return ys[ys.length-1];
+  let lo=0,hi=xs.length-1; while(hi-lo>1){const m=(lo+hi)>>1; if(xs[m]<x) lo=m; else hi=m;}
+  const t=(x-xs[lo])/(xs[hi]-xs[lo]); return ys[lo]*(1-t)+ys[hi]*t;
+}
+
+function smoothFixedKernel(arr, radius=18){
+  // Symmetric Gaussian smoothing of the quantile surface in residual space.
+  // This reduces jagged band edges without using the BTC close as a target.
+  const n=arr.length, out=new Array(n);
+  const sigma=Math.max(1,radius/2.4);
+  const weights=[];
+  for(let k=-radius;k<=radius;k++) weights.push(Math.exp(-0.5*(k/sigma)*(k/sigma)));
+  for(let i=0;i<n;i++){
+    let sw=0, sv=0;
+    for(let k=-radius;k<=radius;k++){
+      const j=Math.max(0,Math.min(n-1,i+k));
+      const w=weights[k+radius];
+      if(isFinite(arr[j])){ sw+=w; sv+=w*arr[j]; }
+    }
+    out[i]=sw?sv/sw:arr[i];
+  }
+  return out;
+}
+function curvedQuantileBetween(lo, mid, hi, p){
+  // Smooth EQM-style quantile geometry:
+  // lower half is interpolated between the 0.1% rail and 50% center,
+  // upper half between 50% center and 99.9% rail.
+  // This is deterministic and uses only model-implied rails/center, not price.
+  if(p===0.5) return mid;
+  if(p<0.5){
+    const z=clamp((p-0.001)/(0.5-0.001),0,1);
+    const gamma=0.85;
+    return lo + (mid-lo)*Math.pow(z,gamma);
+  }else{
+    const z=clamp((p-0.5)/(0.999-0.5),0,1);
+    const gamma=0.95;
+    return mid + (hi-mid)*Math.pow(z,gamma);
+  }
+}
+// ---- Live BTC data loading (no embedded dataset) ----
+// Full daily BTC-USD history is fetched live on page load. Primary source is
+// CryptoCompare's histoday endpoint (CORS-enabled, no API key, history back
+// to 2010); if that fails, we fall back to Binance klines (CORS-enabled, but
+// only covers BTCUSDT history from its 2017-08-17 listing onward). Today's
+// candle is then topped up with a live spot price so the chart reflects the
+// current price between daily closes.
+function fetchWithTimeout(url, options={}, timeoutMs=9000){
+  // Plain Promise.race soft-timeout instead of AbortController: the in-flight
+  // request is simply ignored if it loses the race rather than truly aborted.
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error("fetch timeout")), timeoutMs))
+  ]);
+}
+async function fetchBtcHistoryViaBitstamp(onProgress){
+  // Primary full-history source: Bitstamp's public OHLC API. Free, no API
+  // key, and confirmed to actually send Access-Control-Allow-Origin: * --
+  // unlike blockchain.info's charts endpoint, which returns valid data on
+  // direct browser navigation (no CORS check for page loads) but sends NO
+  // CORS header at all, so a script's fetch() can never read it cross-origin
+  // regardless of what origin serves the page. Bitstamp's BTC/USD data
+  // starts ~2011-09-13, covering nearly all of Bitcoin's price history.
+  const base="https://www.bitstamp.net/api/v2/ohlc/btcusd/";
+  const rowsByMs=new Map();
+  let endTs=Math.floor(Date.now()/1000);
+  const pageSeconds=1000*86400; // Bitstamp caps each request at 1000 daily candles
+  const maxPages=16; // 16 * 1000 days ~= 43 years of daily candles
+  for(let page=1; page<=maxPages; page++){
+    if(onProgress) onProgress(4+Math.min(28,page*2), `Fetching BTC daily history from Bitstamp (page ${page})…`);
+    const startTs=endTs-pageSeconds;
+    const url=`${base}?step=86400&limit=1000&start=${startTs}&end=${endTs}`;
+    const res=await fetchWithTimeout(url,{cache:"no-store"},9000);
+    if(!res.ok) throw new Error(`Bitstamp history fetch failed (HTTP ${res.status}).`);
+    const json=await res.json();
+    const candles=json?.data?.ohlc;
+    if(!Array.isArray(candles) || !candles.length) break;
+    let earliestTs=Infinity, addedAny=false;
+    for(const c of candles){
+      const close=+c.close;
+      const ts=+c.timestamp;
+      if(!isFinite(close) || close<=0 || !isFinite(ts)) continue;
+      earliestTs=Math.min(earliestTs,ts);
+      const ms=ts*1000;
+      if(!rowsByMs.has(ms)){ rowsByMs.set(ms,close); addedAny=true; }
+    }
+    if(!isFinite(earliestTs) || earliestTs>=endTs || !addedAny) break;
+    endTs=earliestTs-1;
+  }
+  if(!rowsByMs.size) throw new Error("No BTC history returned by Bitstamp.");
+  return Array.from(rowsByMs.entries()).sort((a,b)=>a[0]-b[0]).map(([ms,close])=>({t:new Date(ms),close}));
+}
+async function fetchBtcHistoryViaBinance(onProgress){
+  // Fallback if Bitstamp is unreachable. Binance also enforces geographic
+  // eligibility restrictions per its Terms of Service, so this will fail
+  // outright for users in restricted regions -- that's expected, not a bug,
+  // and the chain simply moves on to the next source.
+  const base="https://api.binance.com/api/v3/klines";
+  const rowsByMs=new Map();
+  let endTime=Date.now();
+  const maxPages=20; // 20 * 1000 days ~= 55 years of daily candles
+  for(let page=1; page<=maxPages; page++){
+    if(onProgress) onProgress(4+Math.min(28,page*2), `Fetching BTC daily history from Binance (page ${page})…`);
+    const url=`${base}?symbol=BTCUSDT&interval=1d&limit=1000&endTime=${endTime}`;
+    const res=await fetchWithTimeout(url,{cache:"no-store"},9000);
+    if(!res.ok) throw new Error(`Binance history fetch failed (HTTP ${res.status}).`);
+    const arr=await res.json();
+    if(!Array.isArray(arr) || !arr.length) break;
+    for(const k of arr){
+      const close=+k[4];
+      if(isFinite(close) && close>0) rowsByMs.set(k[0], close);
+    }
+    const earliest=arr[0][0];
+    if(earliest>=endTime) break;
+    endTime=earliest-1;
+    if(arr.length<1000) break;
+  }
+  if(!rowsByMs.size) throw new Error("No BTC history returned by Binance.");
+  return Array.from(rowsByMs.entries()).sort((a,b)=>a[0]-b[0]).map(([ms,close])=>({t:new Date(ms),close}));
+}
+async function fetchBtcHistoryViaCoinGecko(onProgress){
+  // Last-resort fallback: CoinGecko's free public API only allows querying
+  // the past 365 days of history (full history requires a paid plan), so
+  // this covers less than CryptoCompare/Binance -- but it keeps the app
+  // usable if both of those are unreachable (e.g. a network that blocks
+  // exchange-domain APIs specifically).
+  if(onProgress) onProgress(16,"Fetching recent BTC history from CoinGecko (365-day limit on free tier)…");
+  const url="https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365";
+  const res=await fetchWithTimeout(url,{cache:"no-store"},9000);
+  if(!res.ok) throw new Error(`CoinGecko history fetch failed (HTTP ${res.status}).`);
+  const json=await res.json();
+  const prices=json.prices;
+  if(!Array.isArray(prices) || !prices.length) throw new Error("No BTC history returned by CoinGecko.");
+  const byDay=new Map();
+  for(const [ms,close] of prices){
+    if(!isFinite(close)||close<=0) continue;
+    const d=new Date(ms);
+    const dayMs=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+    byDay.set(dayMs, close); // keep the latest sample within each UTC day
+  }
+  if(!byDay.size) throw new Error("No usable BTC prices returned by CoinGecko.");
+  return Array.from(byDay.entries()).sort((a,b)=>a[0]-b[0]).map(([ms,close])=>({t:new Date(ms),close}));
+}
+async function fetchBtcHistoryLive(onProgress){
+  try{
+    return await fetchBtcHistoryViaBitstamp(onProgress);
+  }catch(e1){
+    console.warn("Bitstamp history fetch failed; falling back to Binance.", e1);
+    if(onProgress) onProgress(8,"Primary history source failed — falling back to Binance…");
+    try{
+      return await fetchBtcHistoryViaBinance(onProgress);
+    }catch(e2){
+      console.warn("Binance history fetch failed; falling back to CoinGecko (365-day limit).", e2);
+      if(onProgress) onProgress(12,"Binance unreachable — falling back to CoinGecko (365-day limit)…");
+      return await fetchBtcHistoryViaCoinGecko(onProgress);
+    }
+  }
+}
+async function fetchLiveSpotPrice(){
+  // blockchain.info's ticker first (proven reliable, no geo-restrictions),
+  // then Binance (blocked in some regions per its Terms of Service), then
+  // CoinGecko as a last resort.
+  try{
+    const res=await fetchWithTimeout("https://blockchain.info/ticker",{cache:"no-store"},6000);
+    if(!res.ok) throw new Error("blockchain.info ticker http "+res.status);
+    const json=await res.json();
+    const price=+json?.USD?.last;
+    if(isFinite(price) && price>0) return price;
+    throw new Error("bad blockchain.info ticker price");
+  }catch(e0){
+    console.warn("blockchain.info spot price unavailable; falling back to Binance.", e0);
+    try{
+      const res=await fetchWithTimeout("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT",{cache:"no-store"},6000);
+      if(!res.ok) throw new Error("binance ticker http "+res.status);
+      const json=await res.json();
+      const price=+json.price;
+      if(isFinite(price) && price>0) return price;
+      throw new Error("bad binance ticker price");
+    }catch(e){
+      console.warn("Binance spot price unavailable; falling back to CoinGecko.", e);
+      const res=await fetchWithTimeout("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",{cache:"no-store"},6000);
+      if(!res.ok) throw new Error("coingecko ticker http "+res.status);
+      const json=await res.json();
+      const price=+json?.bitcoin?.usd;
+      if(isFinite(price) && price>0) return price;
+      throw new Error("bad coingecko ticker price");
+    }
+  }
+}
+async function topUpWithLivePrice(baseRows, onProgress){
+  // Refresh today's candle with the live spot price so the chart reflects the
+  // current price between daily candle closes, not just the last completed day.
+  let rows=baseRows;
+  try{
+    if(onProgress) onProgress(34,"Fetching live BTC spot price…");
+    const liveClose=await fetchLiveSpotPrice();
+    const now=new Date();
+    const todayMs=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate());
+    rows=baseRows.slice();
+    const last=rows[rows.length-1];
+    const lastMs=last ? Date.UTC(last.t.getUTCFullYear(),last.t.getUTCMonth(),last.t.getUTCDate()) : -Infinity;
+    if(last && lastMs===todayMs){
+      rows[rows.length-1]={t:new Date(todayMs), close:liveClose, openCandle:true};
+    }else if(todayMs>lastMs){
+      rows.push({t:new Date(todayMs), close:liveClose, openCandle:true});
+    }
+    if(onProgress) onProgress(38, `Live price OK — today's candle updated to $${liveClose.toLocaleString()}.`);
+  }catch(e){
+    console.warn("Live BTC price top-up unavailable; using last completed daily candle.", e);
+    if(onProgress) onProgress(38,"Live spot price unavailable — using last completed daily candle.");
+  }
+  return rows;
+}
+async function fetchBtcData(onProgress=null){
+  if(onProgress) onProgress(2,"Fetching full BTC price history…");
+  let rows=await fetchBtcHistoryLive(onProgress);
+  if(onProgress) onProgress(32, `Fetched ${rows.length.toLocaleString()} daily candles through ${isoDayUTC(rows[rows.length-1].t)}.`);
+  rows=await topUpWithLivePrice(rows,onProgress);
+  if(onProgress) onProgress(40, `Finished BTC load. ${rows.length.toLocaleString()} daily candles through ${isoDayUTC(rows[rows.length-1].t)}.`);
+  return rows.filter(d=>isFinite(d.close)&&d.close>0);
+}
+
+async function fetchOnchainMetricsFromProxy(onProgress=null){
+  // Calls this project's own /api/onchain-metrics Vercel function, which
+  // holds the ChartInspect API key server-side. Returns null (not a thrown
+  // error) on any failure -- e.g. the proxy isn't deployed yet, or is
+  // temporarily unreachable -- so the caller can silently fall back to the
+  // client-side price-derived proxies and the free price chain rather than
+  // breaking the page load. Also carries priceByMs (from the btc_price
+  // field bundled with every ChartInspect metric response), so ChartInspect
+  // can serve as the app's single data source for both price and indicators.
+  try{
+    if(onProgress) onProgress(20,"Fetching data from ChartInspect…");
+    const res=await fetchWithTimeout("/api/onchain-metrics",{cache:"no-store"},20000);
+    if(!res.ok) throw new Error("onchain-metrics proxy http "+res.status);
+    const json=await res.json();
+    if(!json.success) throw new Error(json.error || "onchain-metrics proxy returned failure");
+    if(onProgress) onProgress(38, `ChartInspect OK — ${json.priceCount||0} price / ${json.sharpeCount||0} Sharpe / ${json.cbplCount||0} cost-basis / ${json.onchainRiskCount||0} risk days.`);
+    return {
+      priceByMs: json.priceByMs||{},
+      sharpeZByMs: json.sharpeZByMs||{},
+      cbplZByMs: json.cbplZByMs||{},
+      onchainRiskZByMs: json.onchainRiskZByMs||{}
+    };
+  }catch(e){
+    console.warn("ChartInspect proxy unavailable; falling back to free price sources and price-derived proxies.", e);
+    if(onProgress) onProgress(20,"ChartInspect proxy unavailable — falling back to free price sources…");
+    return null;
+  }
+}
+
+// ---- Live price-derived proxies for Sharpe / Cost Basis P/L ----
+// Neither metric has a free, no-key, CORS-friendly public API (both are
+// normally derived from on-chain UTXO analysis by paid providers). These
+// proxies are computed entirely from the live price series we already have,
+// so they update automatically with no extra network calls or API keys.
+function emaSeries(arr, span){
+  const k=2/(span+1);
+  const out=new Array(arr.length).fill(NaN);
+  let prev=NaN;
+  for(let i=0;i<arr.length;i++){
+    const v=arr[i];
+    if(!isFinite(v)){ out[i]=prev; continue; }
+    prev = isFinite(prev) ? (v*k + prev*(1-k)) : v;
+    out[i]=prev;
+  }
+  return out;
+}
+function expandingZScore(arr, minCount=180){
+  // No-lookahead expanding z-score via Welford's online mean/variance: the
+  // score at index i reflects only values[0..i], so it never uses future
+  // information (safe to use inside a backtest).
+  const n=arr.length;
+  let count=0, mean=0, m2=0;
+  const out=new Array(n).fill(NaN);
+  for(let i=0;i<n;i++){
+    const v=arr[i];
+    if(isFinite(v)){
+      count++;
+      const d=v-mean;
+      mean+=d/count;
+      m2+=d*(v-mean);
+    }
+    if(count<minCount || !isFinite(v)){ out[i]=NaN; continue; }
+    const variance = count>1 ? m2/(count-1) : 0;
+    const std = Math.sqrt(variance)||1e-9;
+    out[i]=clamp((v-mean)/std, -3, 3);
+  }
+  return out;
+}
+function buildSharpeProxyZ(closes, window=90, emaSpan=14, minCount=180){
+  // Rolling Sharpe ratio of daily log returns, 14d EMA smoothed, then an
+  // expanding z-score, sign-flipped so a strong sustained uptrend (which
+  // has historically coincided with overheated/expensive markets) reads as
+  // sell (-), and a weak/negative trend (historically capitulation) reads
+  // as buy (+) -- matching the price valuation's z-score convention.
+  const n=closes.length;
+  const logRet=new Array(n).fill(NaN);
+  for(let i=1;i<n;i++){
+    const p0=closes[i-1], p1=closes[i];
+    if(isFinite(p0)&&p0>0&&isFinite(p1)&&p1>0) logRet[i]=Math.log(p1/p0);
+  }
+  const rollingSharpe=new Array(n).fill(NaN);
+  for(let i=0;i<n;i++){
+    const s=Math.max(0,i-window+1);
+    let cnt=0,mean=0,m2=0;
+    for(let j=s;j<=i;j++){
+      const r=logRet[j];
+      if(isFinite(r)){ cnt++; const d=r-mean; mean+=d/cnt; m2+=d*(r-mean); }
+    }
+    if(cnt<Math.min(window,20)) continue;
+    const variance=cnt>1?m2/(cnt-1):0;
+    const std=Math.sqrt(variance);
+    rollingSharpe[i] = std>1e-9 ? (mean/std)*Math.sqrt(365) : 0;
+  }
+  const smoothed=emaSeries(rollingSharpe, emaSpan);
+  const z=expandingZScore(smoothed, minCount);
+  return z.map(v=>isFinite(v)?-v:NaN);
+}
+function buildCostBasisProxyZ(closes, maWindow=350, emaSpan=7, minCount=180){
+  // log(price / trailing moving average) as a proxy for the fraction of
+  // holders' cost basis sitting in profit vs. loss -- similar in spirit to
+  // well-known price/moving-average valuation heuristics -- 7d EMA smoothed,
+  // then an expanding z-score, sign-flipped so price deep below its trailing
+  // average (historically capitulation) reads as buy (+), and price far
+  // above it (historically euphoria) reads as sell (-).
+  const n=closes.length;
+  const ma=new Array(n).fill(NaN);
+  let sum=0; const buf=[];
+  for(let i=0;i<n;i++){
+    buf.push(closes[i]); sum+=closes[i];
+    if(buf.length>maWindow) sum-=buf.shift();
+    ma[i] = buf.length>=Math.min(maWindow,20) ? sum/buf.length : NaN;
+  }
+  const ratio=new Array(n).fill(NaN);
+  for(let i=0;i<n;i++){
+    const p=closes[i], m=ma[i];
+    if(isFinite(p)&&p>0&&isFinite(m)&&m>0) ratio[i]=Math.log(p/m);
+  }
+  const smoothed=emaSeries(ratio, emaSpan);
+  const z=expandingZScore(smoothed, minCount);
+  return z.map(v=>isFinite(v)?-v:NaN);
+}
+
+// ---- Asymmetric Tail Curvature model (RAQQR) ----
+// Rearranged Asymmetric Quadratic Quantile Regression (Cowen 2026). The
+// conditional quantile of log10(price) is a centered quadratic in log-time:
+//   Q_tau(log10 P) = c + a*x + b*x^2,   x = ln(t) - MU,  t = days since 2009-01-01
+// Curvature b is tied across tail groups: bLO (Q1/Q10/Q25), bMED (Q50),
+// bHI (Q75/Q95/Q99). Published full-sample coefficients (Table 3) are used
+// directly. This model depends only on elapsed time, not on the data source,
+// so it is unaffected by switching from embedded to live-fetched prices.
+const RAQQR_MU = 7.9914;
+const RAQQR_GENESIS = Date.UTC(2009,0,1); // Jan 1 2009 anchor (Table-3 coefficients)
+const RAQQR_KEYS = ["0.01","0.1","0.25","0.5","0.75","0.95","0.99"];
+const RAQQR_RISK_MARKS = [1,10,25,50,75,95,99];
+const RAQQR_COEF = { // key -> [c, a, b]
+  "0.01":[2.837,2.578,-0.0241],
+  "0.1" :[2.933,2.552,-0.0241],
+  "0.25":[3.004,2.554,-0.0241],
+  "0.5" :[3.214,2.482,-0.1126],
+  "0.75":[3.562,2.283,-0.3259],
+  "0.95":[3.897,1.964,-0.3259],
+  "0.99":[4.028,1.904,-0.3259]
+};
+function raqqrPricesAtMs(ms){
+  const t=Math.max(1,Math.round((ms-RAQQR_GENESIS)/ONE_DAY));
+  const x=Math.log(t)-RAQQR_MU;
+  const raw=RAQQR_KEYS.map(k=>{const c=RAQQR_COEF[k];return Math.pow(10,c[0]+c[1]*x+c[2]*x*x);});
+  return raw.slice().sort((p,q)=>p-q); // CFG rearrangement: sort ascending (non-crossing)
+}
+async function buildModel(data,onProgress=null){
+  if(onProgress) onProgress(60,"Evaluating Asymmetric Tail Curvature quantiles…");
+  const bands={lowRail:[], highRail:[]};
+  for(const k of RAQQR_KEYS) bands[k]=[];
+  for(let i=0;i<data.length;i++){
+    const q=raqqrPricesAtMs(data[i].t.getTime()); // 7 ascending price levels
+    for(let j=0;j<RAQQR_KEYS.length;j++) bands[RAQQR_KEYS[j]].push(q[j]);
+    bands.lowRail.push(q[0]);                 // Q1% = lower extreme
+    bands.highRail.push(q[q.length-1]);       // Q99% = upper extreme
+  }
+  if(onProgress) onProgress(85,"Computing live Sharpe & cost-basis proxies…");
+  const closes=data.map(d=>d.close);
+  const sharpeZ=buildSharpeProxyZ(closes);
+  const cbplZ=buildCostBasisProxyZ(closes);
+  if(onProgress) onProgress(98,"Rendering chart…");
+  return {bands,data,sharpeZ,cbplZ};
+}
+const bandDefs=[
+ ["0.01","0.1","1-10% · Fire sale","rgba(23,60,112,0.58)"],
+ ["0.1","0.25","10-25% · Accumulate","rgba(33,131,142,0.58)"],
+ ["0.25","0.5","25-50% · Value","rgba(56,160,75,0.58)"],
+ ["0.5","0.75","50-75% · Above mid","rgba(214,196,32,0.58)"],
+ ["0.75","0.95","75-95% · Hot","rgba(228,116,28,0.58)"],
+ ["0.95","0.99","95-99% · Bubble","rgba(190,10,18,0.58)"]
+];
+function bandForRisk(r){
+  if(r<10)return "1-10% · Fire sale"; if(r<25)return "10-25% · Accumulate"; if(r<50)return "25-50% · Value";
+  if(r<75)return "50-75% · Above mid"; if(r<95)return "75-95% · Hot"; return "95-99% · Bubble";
+}
+
+function empiricalCdf(sortedVals, x){
+  if(!sortedVals.length || !isFinite(x)) return NaN;
+  let lo=0, hi=sortedVals.length;
+  while(lo<hi){
+    const m=(lo+hi)>>1;
+    if(sortedVals[m] <= x) lo=m+1; else hi=m;
+  }
+  return 100*lo/sortedVals.length;
+}
+function cqmColor(r){
+  if(r < 25) return "#22c55e";
+  if(r < 50) return "#95d81d";
+  if(r < 75) return "#f59e0b";
+  return "#ff4444";
+}
+function riskSegmentTraces(dates, risk){
+  // Split each line segment exactly at 25/50/75 threshold crossings so the
+  // colored zones stay visually continuous without thousands of tiny traces.
+  const zones=[
+    {name:"0–25% Buy zone", lo:0, hi:25, color:"#22c55e"},
+    {name:"25–50% Accumulate", lo:25, hi:50, color:"#95d81d"},
+    {name:"50–75% Trim", lo:50, hi:75, color:"#f59e0b"},
+    {name:"75–100% Sell zone", lo:75, hi:100.0001, color:"#ff4444"}
+  ];
+  const traces=zones.map(z=>({
+    x:[],
+    y:[],
+    mode:"lines",
+    name:z.name,
+    line:{color:z.color,width:3.2},
+    yaxis:"y2",
+    connectgaps:false,
+    hovertemplate:"%{x}<br>CQM Risk: %{y:.1f}%<extra></extra>",
+    showlegend:false
+  }));
+
+  function zoneIndex(v){
+    if(v < 25) return 0;
+    if(v < 50) return 1;
+    if(v < 75) return 2;
+    return 3;
+  }
+  function interpDate(t0,t1,a){
+    return new Date(t0 + (t1-t0)*a).toISOString().slice(0,10);
+  }
+
+  for(let i=1;i<dates.length;i++){
+    const r0=risk[i-1], r1=risk[i];
+    if(!isFinite(r0) || !isFinite(r1)) continue;
+    const t0=Date.parse(dates[i-1]), t1=Date.parse(dates[i]);
+    if(!isFinite(t0) || !isFinite(t1)) continue;
+
+    const cuts=[0,1];
+    for(const th of [25,50,75]){
+      if((r0<th && r1>th) || (r0>th && r1<th)){
+        const a=(th-r0)/(r1-r0);
+        if(a>0 && a<1) cuts.push(a);
+      }
+    }
+    cuts.sort((a,b)=>a-b);
+
+    for(let c=0;c<cuts.length-1;c++){
+      const a=cuts[c], b=cuts[c+1];
+      if(b<=a) continue;
+      const ya=r0+(r1-r0)*a;
+      const yb=r0+(r1-r0)*b;
+      const mid=(ya+yb)/2;
+      const zi=zoneIndex(mid);
+      const tr=traces[zi];
+
+      if(tr.x.length){ tr.x.push(null); tr.y.push(null); }
+      tr.x.push(interpDate(t0,t1,a), interpDate(t0,t1,b));
+      tr.y.push(ya, yb);
+    }
+  }
+  return traces;
+}
+function eqmRiskAtIndex(model, idx){
+  const price=model.data[idx]?.close;
+  const b=model.bands;
+  const levels=[
+    b["0.01"]?.[idx], b["0.1"]?.[idx], b["0.25"]?.[idx], b["0.5"]?.[idx],
+    b["0.75"]?.[idx], b["0.95"]?.[idx], b["0.99"]?.[idx]
+  ];
+  const riskMarks=RAQQR_RISK_MARKS;
+  if(!isFinite(price) || price<=0 || levels.some(v=>!isFinite(v)||v<=0)) return NaN;
+  if(price < levels[0]) return 1;
+  if(price > levels[levels.length-1]) return 99;
+  const lp=Math.log(price);
+  for(let i=0;i<levels.length-1;i++){
+    if(price>=levels[i] && price<=levels[i+1]){
+      const lo=Math.log(levels[i]), hi=Math.log(levels[i+1]);
+      const f=(lp-lo)/(hi-lo || 1e-12);
+      return clamp(riskMarks[i] + f*(riskMarks[i+1]-riskMarks[i]), 1, 99);
+    }
+  }
+  return 50;
+}
+function computeCqmSeries(model){
+  const n=model.data.length;
+  const risk=[];
+  for(let i=0;i<n;i++) risk.push(compositeRiskAtIndex(model,i));
+  return risk.map(v=>clamp(v,0,100));
+}
+function cqmZScoreFromRisk(risk){
+  if(!isFinite(risk)) return NaN;
+  return clamp(3*(50-risk)/50,-3,3);
+}
+function currentCqmZScore(){
+  if(!modelState) return NaN;
+  const risk=compositeRiskAtIndex(modelState, modelState.data.length-1);
+  return cqmZScoreFromRisk(risk);
+}
+
+function renderCqm(model){
+  if(!model) return;
+  const cqmEl=document.getElementById("cqmChart");
+  const showZ=document.getElementById("cqmZToggle")?.checked ?? true;
+  if(cqmRenderedModel===model && cqmEl && cqmEl.data){
+    Plotly.Plots.resize(cqmEl);
+    return;
+  }
+  const dates=model.data.map(d=>isoDayUTC(d.t));
+  const hoverDates=model.data.map(d=>hoverDate(d.t));
+  const prices=model.data.map(d=>d.close);
+  const risk=computeCqmSeries(model);
+  const zScores=risk.map(cqmZScoreFromRisk);
+  const zBadge=document.getElementById("cqmZBadge");
+  if(zBadge) zBadge.textContent="Z-score";
+  const priceHover=dates.map((_,i)=>[hoverDates[i],risk[i],zScores[i]]);
+  const zHover=dates.map((_,i)=>[hoverDates[i],risk[i],prices[i]]);
+  const traces=[
+    {
+      x:dates,
+      y:prices,
+      mode:"lines",
+      name:"BTC price",
+      line:{color:"rgba(255,255,255,.88)",width:1.6},
+      yaxis:"y",
+      customdata:priceHover,
+      hovertemplate:"%{customdata[0]}<br>BTC price: %{y:$,.0f}<br>CQM Risk: %{customdata[1]:.1f}%<br>CQM Z-score: %{customdata[2]:+.2f}<extra></extra>",
+      showlegend:false
+    },
+    ...riskSegmentTraces(dates,risk),
+    {
+      x:dates,
+      y:zScores,
+      mode:"lines",
+      name:"Z-score",
+      line:{color:"rgba(224,242,254,.35)",width:1.5},
+      yaxis:"y3",
+      visible:showZ,
+      customdata:zHover,
+      hovertemplate:"%{customdata[0]}<br>CQM Z-score: %{y:+.2f}<br>CQM Risk: %{customdata[1]:.1f}%<br>BTC price: %{customdata[2]:$,.0f}<extra></extra>",
+      showlegend:false
+    }
+  ];
+  const layout={
+    paper_bgcolor:"#0a0f19",
+    plot_bgcolor:"#0a0f19",
+    font:{color:"#dbeafe",family:"Inter, system-ui, sans-serif"},
+    margin:{l:70,r:86,t:20,b:45},
+    hovermode:"closest",
+    xaxis:{
+      gridcolor:"rgba(255,255,255,.06)",
+      tickfont:{color:"#8ea3bd",size:11},
+      rangeslider:{visible:true,bgcolor:"#111a28",bordercolor:"#2c3648",borderwidth:1,thickness:.065}
+    },
+    yaxis:{
+      type:"log",
+      title:"",
+      tickprefix:"$",
+      tickformat:"~s",
+      gridcolor:"rgba(34,90,140,.30)",
+      tickfont:{color:"#9bd1ff"},
+      zeroline:false
+    },
+    yaxis2:{
+      overlaying:"y",
+      side:"right",
+      anchor:"free",
+      position:1,
+      range:[0,100],
+      tickvals:[0,25,50,75,100],
+      ticktext:["0%","25%","50%","75%","100%"],
+      tickfont:{color:"#b7d4f5"},
+      gridcolor:"rgba(16,77,102,.22)",
+      zeroline:false
+    },
+    yaxis3:{
+      overlaying:"y",
+      side:"right",
+      anchor:"free",
+      position:1,
+      range:[-3,3],
+      tickvals:[-3,-2,-1.5,0,1.5,2,3],
+      ticktext:["-3","-2","-1.5","0","+1.5","+2","+3"],
+      showticklabels:false,
+      ticks:"",
+      tickfont:{color:"rgba(224,242,254,.0)"},
+      gridcolor:"rgba(0,0,0,0)",
+      zeroline:false,
+      visible:showZ
+    },
+    shapes:[
+      {type:"rect",xref:"paper",x0:0,x1:1,yref:"y2",y0:0,y1:25,fillcolor:"rgba(15,94,72,.32)",line:{width:0},layer:"below"},
+      {type:"rect",xref:"paper",x0:0,x1:1,yref:"y2",y0:25,y1:50,fillcolor:"rgba(43,113,63,.30)",line:{width:0},layer:"below"},
+      {type:"rect",xref:"paper",x0:0,x1:1,yref:"y2",y0:50,y1:75,fillcolor:"rgba(117,92,40,.28)",line:{width:0},layer:"below"},
+      {type:"rect",xref:"paper",x0:0,x1:1,yref:"y2",y0:75,y1:100,fillcolor:"rgba(137,44,58,.34)",line:{width:0},layer:"below"},
+      {type:"line",xref:"paper",x0:0,x1:1,yref:"y2",y0:50,y1:50,line:{color:"rgba(180,220,220,.9)",width:1,dash:"dash"},layer:"above"},
+      ...(showZ ? [
+        {type:"line",xref:"paper",x0:0,x1:1,yref:"y3",y0:1.5,y1:1.5,line:{color:"rgba(103,232,165,.55)",width:1,dash:"dash"},layer:"above"},
+        {type:"line",xref:"paper",x0:0,x1:1,yref:"y3",y0:-1.5,y1:-1.5,line:{color:"rgba(255,107,107,.55)",width:1,dash:"dash"},layer:"above"}
+      ] : [])
+    ],
+    showlegend:false
+  };
+  Plotly.newPlot("cqmChart",traces,layout,{responsive:true,displaylogo:false,displayModeBar:false}).then(()=>{ cqmRenderedModel=model; });
+}
+
+// ---- Composite indicator framework ----
+// Each indicator contributes a per-day z-score (-3..+3, or NaN if unavailable
+// that day). Composite Z is a simple weighted average across all ENABLED
+// indicators. The price valuation (Asymmetric Tail Curvature) is itself a
+// selectable indicator (default on, weight 1), so with only it enabled the
+// composite reproduces the pure price z-score exactly.
+// onchainMetrics holds real ChartInspect-derived z-scores fetched from our
+// own /api/onchain-metrics proxy (keyed by day-ms, matching model.data
+// timestamps), or null if the proxy is unreachable/not deployed. When a
+// real value exists for a given day it takes priority; otherwise the
+// indicator falls back to the client-side price-derived proxy computed in
+// buildModel (model.sharpeZ / model.cbplZ), so the app still works even
+// without the proxy configured.
+let onchainMetrics = null;
+const INDICATOR_DEFS = [
+  { key:'price',  label:'Asymmetric Tail Curvature (price valuation)', zAtIdx:(model,idx)=>eqmZScoreAtIndex(model,idx) },
+  { key:'sharpe', label:'Sharpe (realized P/L, 14d EMA)', zAtIdx:(model,idx)=>{
+      const d=model.data[idx];
+      const real = (d && onchainMetrics) ? onchainMetrics.sharpeZByMs[d.t.getTime()] : undefined;
+      if(real!==undefined && isFinite(real)) return real;
+      const v=model.sharpeZ?.[idx]; return v===undefined?NaN:v; // price-derived proxy fallback
+    } },
+  { key:'cbpl',   label:'Cost Basis P/L (7d EMA)', zAtIdx:(model,idx)=>{
+      const d=model.data[idx];
+      const real = (d && onchainMetrics) ? onchainMetrics.cbplZByMs[d.t.getTime()] : undefined;
+      if(real!==undefined && isFinite(real)) return real;
+      const v=model.cbplZ?.[idx]; return v===undefined?NaN:v; // price-derived proxy fallback
+    } },
+  { key:'onchainRisk', label:'On-Chain Risk Composite', zAtIdx:(model,idx)=>{
+      const d=model.data[idx];
+      const real = (d && onchainMetrics) ? onchainMetrics.onchainRiskZByMs?.[d.t.getTime()] : undefined;
+      return (real!==undefined && isFinite(real)) ? real : NaN; // no client-side proxy fallback yet
+    } }
+];
+const INDICATOR_STATE = {
+  price:       { enabled:true,  weight:1 },
+  sharpe:      { enabled:false, weight:1 },
+  cbpl:        { enabled:true,  weight:1 },
+  onchainRisk: { enabled:true,  weight:1 }
+};
+function compositeZScoreAtIndex(model, idx){
+  let zSum=0, wSum=0;
+  for(const def of INDICATOR_DEFS){
+    const st=INDICATOR_STATE[def.key];
+    if(!st || !st.enabled) continue;
+    const z=def.zAtIdx(model,idx);
+    if(isFinite(z)){
+      const w=clamp(Number(st.weight)||0, 0, 5);
+      zSum += w*z;
+      wSum += w;
+    }
+  }
+  return wSum>0 ? clamp(zSum/wSum, -3, 3) : NaN;
+}
+function compositeRiskFromZ(z){
+  if(!isFinite(z)) return NaN;
+  return clamp(50 - (z/3)*50, 0, 100);
+}
+function compositeRiskAtIndex(model, idx){
+  return compositeRiskFromZ(compositeZScoreAtIndex(model, idx));
+}
+function refreshComposite(){
+  cqmRenderedModel = null;
+  if(modelState){
+    updatePanels();
+    if(document.getElementById("cqmPane")?.classList.contains("active")) renderCqm(modelState);
+    scheduleCurveBacktest(0);
+  }
+}
+
+function pctExact(v){ return isFinite(v)?v.toFixed(2)+"%":"—"; }
+function btcExact(v){ return isFinite(v)?v.toFixed(8)+" BTC":"—"; }
+function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent=value; }
+function setClassSign(id, value){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.remove("pos","neg");
+  if(isFinite(value)){
+    if(value>0) el.classList.add("pos");
+    if(value<0) el.classList.add("neg");
+  }
+}
+function eqmZScoreAtIndex(model, idx){
+  if(!model || !model.data || !model.bands) return NaN;
+  const price=model.data[idx]?.close;
+  const b=model.bands;
+  const low=b.lowRail?.[idx];
+  const mid=b["0.5"]?.[idx];
+  const high=b.highRail?.[idx];
+  if(!isFinite(price) || price<=0 || !isFinite(low) || low<=0 || !isFinite(mid) || mid<=0 || !isFinite(high) || high<=0 || !(low<mid) || !(mid<high)) return NaN;
+  const lp=Math.log(price), ll=Math.log(low), lm=Math.log(mid), lh=Math.log(high);
+  if(lp<=lm){
+    return clamp(3*(lm-lp)/(lm-ll || 1e-12),0,3);
+  }
+  return clamp(-3*(lp-lm)/(lh-lm || 1e-12),-3,0);
+}
+function currentEqmZScore(){
+  if(!modelState) return NaN;
+  return eqmZScoreAtIndex(modelState, modelState.data.length-1);
+}
+function zScoreText(v){
+  if(!isFinite(v)) return "—";
+  const sign=v>0?"+":"";
+  return sign + v.toFixed(2);
+}
+
+// ---- Accumulation / Distribution Curve (pure CQM-Risk-driven) ----
+const CURVE_RISK_NODES = [0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
+const CURVE_DEFAULT_VALUES = [10,10,10,10,3.5,2.0,1.2,0,0,0,0,0,0,0,0,0,-0.5,-1.5,-2.5,-3.5,-10];
+let curveNodeValues = CURVE_DEFAULT_VALUES.slice();
+function curveValueAtRisk(risk){
+  const r = clamp(Number(risk)||0, 0, 100);
+  for(let i=0;i<CURVE_RISK_NODES.length-1;i++){
+    const x0=CURVE_RISK_NODES[i], x1=CURVE_RISK_NODES[i+1];
+    if(r>=x0 && r<=x1){
+      const y0=curveNodeValues[i], y1=curveNodeValues[i+1];
+      const t=(x1>x0) ? (r-x0)/(x1-x0) : 0;
+      return y0 + t*(y1-y0);
+    }
+  }
+  return curveNodeValues[curveNodeValues.length-1];
+}
+
+// ---- SVG drag editor ----
+const CURVE_SVG_W=760, CURVE_SVG_H=300;
+const CURVE_PAD_L=54, CURVE_PAD_R=14, CURVE_PAD_T=14, CURVE_PAD_B=30;
+const CURVE_PLOT_W=CURVE_SVG_W-CURVE_PAD_L-CURVE_PAD_R;
+const CURVE_PLOT_H=CURVE_SVG_H-CURVE_PAD_T-CURVE_PAD_B;
+function curvePxX(risk){ return CURVE_PAD_L + (risk/100)*CURVE_PLOT_W; }
+function curvePxY(val){ return CURVE_PAD_T + (1 - (clamp(val,-10,10)+10)/20)*CURVE_PLOT_H; }
+function curveValFromPxY(py){
+  const t = 1 - (py-CURVE_PAD_T)/CURVE_PLOT_H;
+  return clamp(Math.round((t*20-10)*10)/10, -10, 10); // snap to 0.1%
+}
+const SVGNS="http://www.w3.org/2000/svg";
+let curveSvgEls=null;
+function buildCurveEditorSvg(){
+  const svg=document.getElementById("curveEditorSvg");
+  if(!svg || svg.dataset.built==="1") return;
+  svg.setAttribute("viewBox",`0 0 ${CURVE_SVG_W} ${CURVE_SVG_H}`);
+  function el(tag,attrs){
+    const e=document.createElementNS(SVGNS,tag);
+    for(const k in attrs) e.setAttribute(k,attrs[k]);
+    return e;
+  }
+  svg.appendChild(el("rect",{x:CURVE_PAD_L,y:CURVE_PAD_T,width:CURVE_PLOT_W,height:CURVE_PLOT_H/2,fill:"rgba(34,197,94,.07)"}));
+  svg.appendChild(el("rect",{x:CURVE_PAD_L,y:CURVE_PAD_T+CURVE_PLOT_H/2,width:CURVE_PLOT_W,height:CURVE_PLOT_H/2,fill:"rgba(255,68,68,.07)"}));
+  for(let v=-10;v<=10;v++){
+    const y=curvePxY(v);
+    const isZero=(v===0), isMajor=(v%5===0);
+    svg.appendChild(el("line",{x1:CURVE_PAD_L,x2:CURVE_PAD_L+CURVE_PLOT_W,y1:y,y2:y,
+      stroke:isZero?"rgba(230,237,243,.55)":(isMajor?"rgba(255,255,255,.13)":"rgba(255,255,255,.05)"),
+      "stroke-width":isZero?1.4:1}));
+    if(isMajor){
+      const lbl=el("text",{x:CURVE_PAD_L-6,y:y+4,fill:"#8ea0b3","font-size":9,"text-anchor":"end"});
+      lbl.textContent=(v>0?"+":"")+v+"%";
+      svg.appendChild(lbl);
+    }
+  }
+  const yAxisLabel=el("text",{x:-(CURVE_SVG_H/2),y:14,fill:"#8ea0b3","font-size":10,"text-anchor":"middle",transform:"rotate(-90)"});
+  yAxisLabel.textContent="% of cash/BTC traded per day";
+  svg.appendChild(yAxisLabel);
+  for(const r of CURVE_RISK_NODES){
+    const x=curvePxX(r);
+    const isTenPct=(r%10===0);
+    svg.appendChild(el("line",{x1:x,x2:x,y1:CURVE_PAD_T,y2:CURVE_PAD_T+CURVE_PLOT_H,
+      stroke:isTenPct?"rgba(255,255,255,.09)":"rgba(255,255,255,.04)","stroke-width":1}));
+    if(isTenPct){
+      const lbl=el("text",{x,y:CURVE_SVG_H-10,fill:"#8ea0b3","font-size":9,"text-anchor":"middle"});
+      lbl.textContent=r+"%";
+      svg.appendChild(lbl);
+    }
+  }
+  const path=el("path",{d:"",fill:"none",stroke:"#6fd3ff","stroke-width":2.6});
+  svg.appendChild(path);
+  const nodeCircles=[], nodeLabels=[];
+  CURVE_RISK_NODES.forEach((r,i)=>{
+    const label=el("text",{x:curvePxX(r),y:0,fill:"#e6edf3","font-size":10,"font-weight":700,"text-anchor":"middle",opacity:0});
+    svg.appendChild(label);
+    nodeLabels.push(label);
+    const c=el("circle",{cx:curvePxX(r),cy:0,r:5,fill:"#6fd3ff",stroke:"#0c1118","stroke-width":1.5,class:"curveNode"});
+    c.dataset.idx=i;
+    svg.appendChild(c);
+    nodeCircles.push(c);
+  });
+  curveSvgEls={svg,path,nodeCircles,nodeLabels};
+  redrawCurveEditor();
+
+  let draggingIdx=null;
+  function svgPointFromEvent(evt){
+    const pt=svg.createSVGPoint();
+    pt.x=evt.clientX; pt.y=evt.clientY;
+    const ctm=svg.getScreenCTM();
+    if(!ctm) return {x:0,y:0};
+    const loc=pt.matrixTransform(ctm.inverse());
+    return {x:loc.x,y:loc.y};
+  }
+  function onPointerDown(evt){
+    const idx=+evt.target.dataset.idx;
+    if(!isFinite(idx)) return;
+    draggingIdx=idx;
+    curveDraggingIdx=idx;
+    evt.target.setPointerCapture?.(evt.pointerId);
+    evt.preventDefault();
+  }
+  function onPointerMove(evt){
+    if(draggingIdx===null) return;
+    const p=svgPointFromEvent(evt);
+    curveNodeValues[draggingIdx]=curveValFromPxY(p.y);
+    redrawCurveEditor();
+  }
+  function onPointerUp(){
+    if(draggingIdx===null) return;
+    draggingIdx=null;
+    curveDraggingIdx=null;
+    redrawCurveEditor();
+    scheduleCurveBacktest(0);
+    updatePanels();
+  }
+  nodeCircles.forEach(c=>c.addEventListener("pointerdown",onPointerDown));
+  svg.addEventListener("pointermove",onPointerMove);
+  svg.addEventListener("pointerup",onPointerUp);
+  svg.addEventListener("pointerleave",onPointerUp);
+  svg.dataset.built="1";
+}
+let curveDraggingIdx=null;
+function redrawCurveEditor(){
+  if(!curveSvgEls) return;
+  const {path,nodeCircles,nodeLabels}=curveSvgEls;
+  let d="";
+  CURVE_RISK_NODES.forEach((r,i)=>{
+    const x=curvePxX(r), y=curvePxY(curveNodeValues[i]);
+    d += (i===0?"M":"L")+x+","+y+" ";
+    nodeCircles[i].setAttribute("cy",y);
+    nodeCircles[i].setAttribute("fill", curveNodeValues[i]>0.05?"#24e572":(curveNodeValues[i]<-0.05?"#ff5656":"#8ea0b3"));
+    const isDragging=(i===curveDraggingIdx);
+    const above = curveNodeValues[i] >= 0;
+    nodeLabels[i].setAttribute("y", above ? y-10 : y+18);
+    nodeLabels[i].textContent=(curveNodeValues[i]>0?"+":"")+curveNodeValues[i].toFixed(1)+"%";
+    nodeLabels[i].setAttribute("opacity", isDragging ? "1" : "0");
+  });
+  path.setAttribute("d",d.trim());
+}
+function resetCurveToDefault(){
+  curveNodeValues=CURVE_DEFAULT_VALUES.slice();
+  redrawCurveEditor();
+  scheduleCurveBacktest(0);
+  updatePanels();
+}
+
+function backtestClosedRows(model){
+  const rows=[];
+  if(!model || !model.data) return rows;
+  for(let i=0;i<model.data.length;i++){
+    const d=model.data[i];
+    if(!d || !isFinite(d.close) || d.close<=0) continue;
+    const ms=Date.UTC(d.t.getUTCFullYear(),d.t.getUTCMonth(),d.t.getUTCDate());
+    rows.push({idx:i, ms, date:isoDayUTC(d.t), price:d.close});
+  }
+  return rows;
+}
+function formatBacktestDateText(value){
+  const digits=String(value||"").replace(/\D/g,"").slice(0,8);
+  if(digits.length<=4) return digits;
+  if(digits.length<=6) return digits.slice(0,4)+"-"+digits.slice(4);
+  return digits.slice(0,4)+"-"+digits.slice(4,6)+"-"+digits.slice(6);
+}
+function normalizeBacktestDateInput(el){
+  if(!el) return "";
+  const formatted=formatBacktestDateText(el.value);
+  el.value=formatted;
+  return formatted;
+}
+function closestBacktestRowIndex(rows, dateStr){
+  if(!rows.length || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr||"")) return -1;
+  const target=Date.parse(dateStr+"T00:00:00Z");
+  if(!isFinite(target)) return -1;
+  let lo=0, hi=rows.length-1;
+  while(lo<hi){
+    const mid=(lo+hi)>>1;
+    if(rows[mid].ms<target) lo=mid+1;
+    else hi=mid;
+  }
+  if(lo>0 && Math.abs(rows[lo-1].ms-target) <= Math.abs(rows[lo].ms-target)) return lo-1;
+  return lo;
+}
+function setDefaultCurveInputs(model){
+  const rows=backtestClosedRows(model);
+  if(!rows.length) return;
+  const startEl=document.getElementById("curveStartInput");
+  const cashEl=document.getElementById("curveCashInput");
+  const minDate=rows[0].date, maxDate=rows[rows.length-1].date;
+  if(startEl){
+    startEl.min=minDate; startEl.max=maxDate;
+    const defaultStartDate="2015-01-01";
+    let startPos=closestBacktestRowIndex(rows,startEl.value||defaultStartDate);
+    if(startPos<0) startPos=closestBacktestRowIndex(rows,defaultStartDate);
+    if(startPos<0) startPos=Math.max(0,rows.length-365);
+    startEl.value=rows[startPos].date;
+  }
+  if(cashEl && (!cashEl.value || +cashEl.value<=0)) cashEl.value="10000";
+}
+function syncCurveDateControls(){
+  const rows=backtestClosedRows(modelState);
+  if(!rows.length) return;
+  const startEl=document.getElementById("curveStartInput");
+  const startValue=normalizeBacktestDateInput(startEl);
+  if(startEl){ startEl.min=rows[0].date; startEl.max=rows[rows.length-1].date; }
+  if(!startValue || startValue.length<10) return;
+  let startPos=closestBacktestRowIndex(rows,startValue||"");
+  if(startPos<0) startPos=0;
+  startPos=clamp(startPos,0,rows.length-1);
+  if(startEl) startEl.value=rows[startPos].date;
+}
+function clearCurveResults(message="Fetch BTC data first."){
+  for(const id of ["cvDays","cvStartingCash","cvBtc","cvBtcValue","cvPnl","cvAvgRate","cvLumpValue","cvVsLump","cvCash"]) setText(id,"—");
+  for(const id of ["cvBuyDays","cvAvgBuy","cvReturn","cvAvgRisk","cvLumpReturn","cvVsLumpPct"]) setText(id,"—");
+  setText("curveStatus",message);
+  const el=document.getElementById("curveChart");
+  if(el && el.data) Plotly.react(el,[],{paper_bgcolor:"#0a0f19",plot_bgcolor:"#0a0f19"},{responsive:true,displaylogo:false,displayModeBar:false});
+  curveRenderedKey=null;
+}
+let curveRenderedKey=null;
+function curveZoneShapes(rows, model){
+  const shapes=[];
+  if(!rows || !rows.length || !model) return shapes;
+  function zoneOf(risk){
+    if(!isFinite(risk)) return {id:"unknown",color:"rgba(80,90,105,.16)"};
+    const v=curveValueAtRisk(risk);
+    if(v>0.05) return {id:"buy",color:"rgba(15,94,72,.30)"};
+    if(v<-0.05) return {id:"sell",color:"rgba(137,44,58,.30)"};
+    return {id:"flat",color:"rgba(80,90,105,.12)"};
+  }
+  let active=null, startDate=null, lastMs=null, lastColor=null;
+  function pushShape(x0,x1,color){
+    if(!x0 || !x1 || !color) return;
+    shapes.push({type:"rect",xref:"x",x0,x1,yref:"paper",y0:0,y1:1,fillcolor:color,line:{width:0},layer:"below"});
+  }
+  for(const row of rows){
+    const zone=zoneOf(compositeRiskAtIndex(model,row.idx));
+    if(active===null){ active=zone.id; startDate=row.date; lastColor=zone.color; }
+    else if(zone.id!==active){ pushShape(startDate,row.date,lastColor); active=zone.id; startDate=row.date; lastColor=zone.color; }
+    lastMs=row.ms;
+  }
+  const endDate=lastMs ? isoDayUTC(new Date(lastMs+ONE_DAY)) : rows[rows.length-1].date;
+  pushShape(startDate,endDate,lastColor);
+  return shapes;
+}
+function runCurveBacktest(){
+  const model=modelState;
+  if(!model){ clearCurveResults("Fetch BTC data first."); return; }
+  const allRows=backtestClosedRows(model);
+  if(!allRows.length){ clearCurveResults("No BTC daily candles found."); return; }
+
+  const startEl=document.getElementById("curveStartInput");
+  const startStr=normalizeBacktestDateInput(startEl);
+  const startingCash=+(document.getElementById("curveCashInput")?.value || 0);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(startStr)){ clearCurveResults("Choose a valid starting date."); return; }
+  if(!isFinite(startingCash) || startingCash<=0){ clearCurveResults("Enter a positive starting capital amount."); return; }
+
+  const startMs=Date.parse(startStr+"T00:00:00Z");
+  if(!isFinite(startMs)){ clearCurveResults("Choose a valid starting date."); return; }
+  const rows=allRows.filter(row=>row.ms>=startMs);
+  if(!rows.length){ clearCurveResults("No BTC daily candles found after that starting date."); return; }
+
+  let cash=startingCash, btc=0, netDeployed=0, grossBought=0, grossSold=0, btcBoughtGross=0;
+  let buyDays=0, sellDays=0, noTradeDays=0, riskSum=0, riskCount=0, rateSum=0;
+  const perDateAfterTrade=new Map();
+
+  for(const row of rows){
+    const risk=compositeRiskAtIndex(model,row.idx);
+    const rate=isFinite(risk) ? curveValueAtRisk(risk) : 0;
+    let trade=0;
+    if(rate>0.0001){
+      const buyUsd=clamp(cash*(rate/100),0,cash);
+      if(buyUsd>0.005){
+        const btcBought=buyUsd/row.price;
+        cash-=buyUsd; btc+=btcBought; netDeployed+=buyUsd; grossBought+=buyUsd; btcBoughtGross+=btcBought;
+        trade=buyUsd; buyDays++;
+      }else noTradeDays++;
+    }else if(rate<-0.0001){
+      const sellBtc=clamp(btc*(-rate/100),0,btc);
+      if(sellBtc>1e-12){
+        const sellUsd=sellBtc*row.price;
+        cash+=sellUsd; btc-=sellBtc; netDeployed-=sellUsd; grossSold+=sellUsd;
+        trade=-sellUsd; sellDays++;
+      }else noTradeDays++;
+    }else noTradeDays++;
+    if(isFinite(risk)){ riskSum+=risk; rateSum+=rate; riskCount++; }
+    perDateAfterTrade.set(row.date,{portfolio:cash+btc*row.price, deployed:netDeployed, cash, dailyTrade:trade, price:row.price, risk, rate});
+  }
+
+  const latestPrice=rows[rows.length-1].price;
+  const btcValue=btc*latestPrice;
+  const portfolioValue=btcValue+cash;
+  const pnl=portfolioValue-startingCash;
+  const retPct=100*pnl/startingCash;
+  const avgBuy=btcBoughtGross>0 ? grossBought/btcBoughtGross : NaN;
+  const avgRisk=riskCount ? riskSum/riskCount : NaN;
+  const avgRate=riskCount ? rateSum/riskCount : NaN;
+  const firstClose=rows[0].price;
+  const lumpBtc=startingCash/firstClose;
+  const lumpValue=lumpBtc*latestPrice;
+  const lumpPnl=lumpValue-startingCash;
+  const lumpRet=100*lumpPnl/startingCash;
+  const vsLump=portfolioValue-lumpValue;
+  const vsLumpPct=100*vsLump/lumpValue;
+
+  setText("cvDays",rows.length.toLocaleString());
+  setText("cvBuyDays",`Buy ${buyDays.toLocaleString()} / Sell ${sellDays.toLocaleString()} / No trade ${noTradeDays.toLocaleString()}`);
+  setText("cvStartingCash",usdExact(startingCash));
+  setText("cvBtc",btcExact(btc));
+  setText("cvAvgBuy",isFinite(avgBuy)?`Avg buy ${usdExact(avgBuy)}`:"No BTC bought");
+  setText("cvBtcValue",usdExact(portfolioValue));
+  setText("cvPnl",`${pnl>=0?"+":""}${usdExact(pnl)}`);
+  setText("cvReturn",`${retPct>=0?"+":""}${pctExact(retPct)}`);
+  setClassSign("cvPnl",pnl);
+  setClassSign("cvReturn",retPct);
+  setText("cvAvgRate",isFinite(avgRate)?`${avgRate>=0?"+":""}${avgRate.toFixed(2)}%/day`:"—");
+  setText("cvAvgRisk",isFinite(avgRisk)?`Avg risk ${avgRisk.toFixed(1)}%`:"—");
+  setText("cvLumpValue",usdExact(lumpValue));
+  setText("cvLumpReturn",`${lumpRet>=0?"+":""}${pctExact(lumpRet)}`);
+  setClassSign("cvLumpReturn",lumpRet);
+  setText("cvVsLump",`${vsLump>=0?"+":""}${usdExact(vsLump)}`);
+  setText("cvVsLumpPct",`${vsLumpPct>=0?"+":""}${pctExact(vsLumpPct)}`);
+  setClassSign("cvVsLump",vsLump);
+  setClassSign("cvVsLumpPct",vsLumpPct);
+  setText("cvCash",usdExact(cash));
+  setText("curveStatus","");
+
+  const chartRows=rows;
+  const chartDates=[], portfolioPlot=[], cashPlot=[], btcClosePlot=[];
+  for(const row of chartRows){
+    chartDates.push(row.date);
+    btcClosePlot.push(row.price);
+    const during=perDateAfterTrade.get(row.date);
+    portfolioPlot.push(during?.portfolio ?? null);
+    cashPlot.push(during?.cash ?? null);
+  }
+  const customHover=chartDates.map((d,i)=>[portfolioPlot[i],cashPlot[i],btcClosePlot[i]]);
+  const traces=[
+    {x:chartDates,y:portfolioPlot,type:"scatter",mode:"lines",name:"Portfolio value",line:{color:"#67e8a5",width:2.6},connectgaps:false,customdata:customHover,hovertemplate:"Portfolio value: %{customdata[0]:$,.2f}<br>Cash reserve: %{customdata[1]:$,.2f}<br>BTC price: %{customdata[2]:$,.0f}<extra></extra>"},
+    {x:chartDates,y:btcClosePlot,type:"scatter",mode:"lines",name:"BTC close",line:{color:"rgba(255,255,255,.65)",width:1.4},hoverinfo:"skip",yaxis:"y2"}
+  ];
+  const layout={
+    paper_bgcolor:"#0a0f19",
+    plot_bgcolor:"#0a0f19",
+    font:{color:"#dbeafe",family:"Inter, system-ui, sans-serif"},
+    margin:{l:70,r:90,t:20,b:48},
+    hovermode:"x unified",
+    xaxis:{range:[startStr, chartRows[chartRows.length-1]?.date || rows[rows.length-1].date],gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#8ea3bd",size:11},rangeslider:{visible:true,bgcolor:"#111a28",bordercolor:"#2c3648",borderwidth:1,thickness:.065}},
+    yaxis:{...(curveLogScale?{type:"log"}:{}),title:"USD",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(255,255,255,.06)",tickfont:{color:"#8ea3bd",size:11},zeroline:false},
+    yaxis2:{type:"log",overlaying:"y",side:"right",tickprefix:"$",tickformat:"~s",gridcolor:"rgba(0,0,0,0)",tickfont:{color:"#e8edf5"},zeroline:false},
+    shapes:curveZoneShapes(chartRows,model),
+    legend:{orientation:"h",x:0,y:1.1,bgcolor:"rgba(0,0,0,0)",font:{color:"#fff",size:11}},
+    showlegend:true,
+    uirevision:"curve-backtest-fixed-view"
+  };
+  const key=JSON.stringify([startStr,startingCash,model.data.length,latestPrice,curveNodeValues,curveLogScale,"curve-backtest-v2"]);
+  const curveEl=document.getElementById("curveChart");
+  const config={responsive:true,displaylogo:false,displayModeBar:false};
+  const plotPromise=(curveEl && curveEl.data) ? Plotly.react(curveEl,traces,layout,config) : Plotly.newPlot("curveChart",traces,layout,config);
+  plotPromise.then(()=>{ curveRenderedKey=key; });
+}
+let curveLogScale=false;
+let curveInputTimer=null;
+function scheduleCurveBacktest(delay=0){
+  if(!document.getElementById("curvePane")?.classList.contains("active")) return;
+  if(curveInputTimer) clearTimeout(curveInputTimer);
+  curveInputTimer=setTimeout(()=>{
+    curveInputTimer=null;
+    requestAnimationFrame(()=>runCurveBacktest());
+  }, delay);
+}
+
+function setActiveTab(which){
+  const isCqm=which==="cqm";
+  const isCurve=which==="curve";
+  const isEqm=!isCqm && !isCurve;
+  document.getElementById("eqmTabBtn")?.classList.toggle("active",isEqm);
+  document.getElementById("cqmTabBtn")?.classList.toggle("active",isCqm);
+  document.getElementById("curveTabBtn")?.classList.toggle("active",isCurve);
+  document.getElementById("eqmPane")?.classList.toggle("active",isEqm);
+  document.getElementById("cqmPane")?.classList.toggle("active",isCqm);
+  document.getElementById("curvePane")?.classList.toggle("active",isCurve);
+  if(isCurve){
+    buildCurveEditorSvg();
+    if(modelState){
+      setDefaultCurveInputs(modelState);
+      requestAnimationFrame(()=>runCurveBacktest());
+    }else{
+      clearCurveResults("Fetch BTC data first.");
+    }
+  }else if(isCqm && modelState){
+    const cqmEl=document.getElementById("cqmChart");
+    if(cqmRenderedModel===modelState && cqmEl && cqmEl.data){
+      requestAnimationFrame(()=>Plotly.Plots.resize(cqmEl));
+    }else{
+      requestAnimationFrame(()=>renderCqm(modelState));
+    }
+  }else{
+    const chart=document.getElementById("chart");
+    if(chart && chart.data) requestAnimationFrame(()=>Plotly.Plots.resize(chart));
+  }
+}
+
+function scheduleCqmPrewarm(model){
+  if(!model) return;
+  const run=()=>{
+    if(cqmRenderedModel!==model){
+      renderCqm(model);
+    }
+  };
+  if("requestIdleCallback" in window){
+    requestIdleCallback(run,{timeout:1200});
+  }else{
+    setTimeout(run,250);
+  }
+}
+
+function render(model){
+  modelState=model;
+  cqmRenderedModel=null;
+  backtestRenderedKey=null;
+  const dates=model.data.map(d=>isoDayUTC(d.t)), hoverDates=model.data.map(d=>hoverDate(d.t)), price=model.data.map(d=>d.close), b=model.bands, n=price.length-1;
+  const traces=[];
+  for(let i=0;i<bandDefs.length;i++){
+    const def=bandDefs[i], lo=b[def[0]], hi=b[def[1]];
+    traces.push({
+      x:dates,
+      y:hi,
+      mode:"lines",
+      line:{width:0},
+      showlegend:false,
+      hoverinfo:"skip",
+      legendgroup:def[2]
+    });
+    traces.push({
+      x:dates,
+      y:lo,
+      mode:"lines",
+      name:`${def[2]}  ${usd(lo[n])}-${usd(hi[n])}`,
+      fill:"tonexty",
+      fillcolor:def[3],
+      line:{color:"rgba(0,0,0,0)",width:0},
+      hoverinfo:"skip",
+      showlegend:true,
+      legendrank:20+i,
+      legendgroup:def[2]
+    });
+  }
+
+  traces.push({x:dates,y:b.highRail,mode:"lines",name:`Q99% rail  ${usd(b.highRail[n])}`,line:{color:"#ff5c61",width:1.2},hoverinfo:"skip",showlegend:true,legendrank:10});
+  traces.push({x:dates,y:b.lowRail,mode:"lines",name:`Q1% rail  ${usd(b.lowRail[n])}`,line:{color:"#5fb8ff",width:1.2},hoverinfo:"skip",showlegend:true,legendrank:11});
+  traces.push({
+    x:dates,
+    y:b["0.5"],
+    mode:"lines",
+    name:`Q50% median  ${usd(b["0.5"][n])}`,
+    line:{color:"#ffffff",width:2.3},
+    customdata:hoverDates,
+    hovertemplate:"%{customdata}<br>Q50% median: %{y:$,.0f}<extra></extra>",
+    showlegend:true,
+    legendrank:12
+  });
+
+  traces.push({
+    x:dates,
+    y:price,
+    mode:"lines",
+    name:"BTC price outline",
+    line:{color:"#000000",width:4.2},
+    hoverinfo:"skip",
+    showlegend:false,
+    legendrank:0
+  });
+  const currentZForLegend=eqmZScoreAtIndex(model,n);
+  const btcHoverData=dates.map((_,i)=>[hoverDates[i],eqmZScoreAtIndex(model,i)]);
+  traces.push({
+    x:dates,
+    y:price,
+    mode:"lines",
+    name:"BTC price",
+    line:{color:"#ffffff",width:3.25},
+    customdata:btcHoverData,
+    hovertemplate:"%{customdata[0]}<br>BTC price: %{y:$,.0f}<br>z-score: %{customdata[1]:+.2f}<extra></extra>",
+    showlegend:true,
+    legendrank:0
+  });
+  traces.push({
+    x:[dates[n]],
+    y:[price[n]],
+    mode:"markers",
+    name:`z-score  ${zScoreText(currentZForLegend)}`,
+    marker:{color:"#000000",size:8,symbol:"diamond",line:{color:"#ffffff",width:1.1}},
+    hoverinfo:"skip",
+    showlegend:true,
+    legendrank:1
+  });
+
+  const asOfEl=document.getElementById("eqmAsOf");
+  if(asOfEl) asOfEl.textContent=`As of ${titleDate(model.data[model.data.length-1]?.t)} · live`;
+  const layout={
+    paper_bgcolor:"#04060a",plot_bgcolor:"#04060a",font:{color:"#fff",family:"Inter, system-ui, sans-serif"},
+    margin:{l:35,r:80,t:20,b:40},hovermode:"closest",
+    xaxis:{gridcolor:"rgba(255,255,255,.07)",tickfont:{color:"#9fb0c3",size:11}},
+    yaxis:{type:"log",side:"right",gridcolor:"rgba(255,255,255,.07)",tickprefix:"$",tickformat:"~s",tickfont:{color:"#9fb0c3",size:11}},
+    legend:{x:.82,y:.05,bgcolor:"rgba(10,14,22,.92)",bordercolor:"#232c3a",borderwidth:1,font:{size:11,color:"#dbe4f0"},tracegroupgap:0},
+    shapes:[],annotations:[]
+  };
+  layout.showlegend=document.getElementById("legendToggle")?.checked ?? true;
+  Plotly.newPlot("chart",traces,layout,{responsive:true,displaylogo:false,displayModeBar:false}).then(()=>{
+    scheduleCqmPrewarm(model);
+    if(document.getElementById("cqmPane")?.classList.contains("active")) renderCqm(model);
+    scheduleCurveBacktest(0);
+  });
+  setDefaultCurveInputs(model);
+  updatePanels();
+}
+function updatePanels(){
+  const m=modelState; if(!m) return;
+  const n=m.data.length-1, price=m.data[n].close, b=m.bands;
+  let risk=currentEqmRisk();
+  const zScore=currentEqmZScore();
+  document.getElementById("mPrice").textContent=usd(price);
+  document.getElementById("mEq").textContent=usd(b["0.5"][n]);
+  document.getElementById("mLowRail").textContent=usd(b.lowRail[n]);
+  document.getElementById("mHighRail").textContent=usd(b.highRail[n]);
+  document.getElementById("mRisk").textContent=pct(risk);
+  setClassSign("mRisk",zScore);
+  setClassSign("mZScore",zScore);
+  const cqmRisk=computeCqmSeries(m)[n];
+  const cqmZ=cqmZScoreFromRisk(cqmRisk);
+  document.getElementById("mCqmRisk").textContent=pct(cqmRisk);
+  document.getElementById("mZScore").textContent=zScoreText(zScore);
+  document.getElementById("mCqmZScore").textContent=zScoreText(cqmZ);
+  setClassSign("mCqmRisk",cqmZ);
+  setClassSign("mCqmZScore",cqmZ);
+  const compositeZ=compositeZScoreAtIndex(m,n);
+  const compositeRisk=compositeRiskFromZ(compositeZ);
+  document.getElementById("mCompositeRisk").textContent=pct(compositeRisk);
+  document.getElementById("mCompositeZScore").textContent=zScoreText(compositeZ);
+  setClassSign("mCompositeRisk",compositeZ);
+  setClassSign("mCompositeZScore",compositeZ);
+  document.getElementById("mBand").textContent=bandForRisk(risk);
+  document.getElementById("bandList").innerHTML=`<div class="bandRow"><span class="bandName"><span>Current EQM Z-score</span></span><b>${zScoreText(zScore)}</b></div>` + bandDefs.map(def=>`<div class="bandRow"><span class="bandName"><i class="swatch" style="background:${def[3]}"></i><span>${def[2]}</span></span><b>${usd(b[def[0]][n])}-${usd(b[def[1]][n])}</b></div>`).join("");
+  updateTodaysAction(compositeRisk);
+}
+function updateTodaysAction(risk){
+  // Recommended daily deployment, as a % of current cash (buy) or current
+  // BTC (sell), read straight off the Accum/Dist curve at today's composite
+  // risk level -- the same curveValueAtRisk() function the backtest uses.
+  const labelEl=document.getElementById("actionLabel");
+  const subEl=document.getElementById("actionSub");
+  const boxEl=document.querySelector("#todaysActionCard .actionBox");
+  if(!labelEl || !subEl || !boxEl) return;
+  boxEl.classList.remove("buy","sell");
+  if(!isFinite(risk)){
+    labelEl.className="actionLabel hold";
+    labelEl.textContent="—";
+    subEl.textContent="Load BTC data to see today's recommended action.";
+    return;
+  }
+  const rate=curveValueAtRisk(risk);
+  const band=bandForRisk(risk);
+  if(rate>0.05){
+    labelEl.className="actionLabel buy";
+    labelEl.textContent=`BUY ${rate.toFixed(2)}% of cash`;
+    boxEl.classList.add("buy");
+  }else if(rate<-0.05){
+    labelEl.className="actionLabel sell";
+    labelEl.textContent=`SELL ${Math.abs(rate).toFixed(2)}% of BTC`;
+    boxEl.classList.add("sell");
+  }else{
+    labelEl.className="actionLabel hold";
+    labelEl.textContent="HOLD — no action";
+  }
+  subEl.textContent=`Composite Risk ${risk.toFixed(1)}% · ${band} · per your Accum/Dist curve settings`;
+}
+function currentEqmRisk(){
+  if(!modelState) return NaN;
+  return eqmRiskAtIndex(modelState, modelState.data.length-1);
+}
+
+document.getElementById("indSharpeToggle")?.addEventListener("change",e=>{
+  INDICATOR_STATE.sharpe.enabled = !!e.target.checked;
+  refreshComposite();
+});
+document.getElementById("indPriceToggle")?.addEventListener("change",e=>{
+  INDICATOR_STATE.price.enabled = !!e.target.checked;
+  refreshComposite();
+});
+document.getElementById("indPriceWeight")?.addEventListener("input",e=>{
+  const w = clamp(Number(e.target.value)||0, 0, 5);
+  INDICATOR_STATE.price.weight = w;
+  if(INDICATOR_STATE.price.enabled) refreshComposite();
+});
+document.getElementById("indSharpeWeight")?.addEventListener("input",e=>{
+  const w = clamp(Number(e.target.value)||0, 0, 5);
+  INDICATOR_STATE.sharpe.weight = w;
+  if(INDICATOR_STATE.sharpe.enabled) refreshComposite();
+});
+document.getElementById("indCbplToggle")?.addEventListener("change",e=>{
+  INDICATOR_STATE.cbpl.enabled = !!e.target.checked;
+  refreshComposite();
+});
+document.getElementById("indCbplWeight")?.addEventListener("input",e=>{
+  const w = clamp(Number(e.target.value)||0, 0, 5);
+  INDICATOR_STATE.cbpl.weight = w;
+  if(INDICATOR_STATE.cbpl.enabled) refreshComposite();
+});
+document.getElementById("indOnchainRiskToggle")?.addEventListener("change",e=>{
+  INDICATOR_STATE.onchainRisk.enabled = !!e.target.checked;
+  refreshComposite();
+});
+document.getElementById("indOnchainRiskWeight")?.addEventListener("input",e=>{
+  const w = clamp(Number(e.target.value)||0, 0, 5);
+  INDICATOR_STATE.onchainRisk.weight = w;
+  if(INDICATOR_STATE.onchainRisk.enabled) refreshComposite();
+});
+
+document.addEventListener("change",e=>{
+  if(e.target && e.target.id==="cqmZToggle"){
+    cqmRenderedModel=null;
+    if(modelState) renderCqm(modelState);
+  }
+});
+
+function setSideCollapsed(collapsed){
+  document.body.classList.toggle("sideCollapsed", collapsed);
+  const btn=document.getElementById("sideToggleBtn");
+  if(btn) btn.textContent="Hide menu";
+  requestAnimationFrame(()=>{
+    for(const id of ["chart","cqmChart","curveChart"]){
+      const el=document.getElementById(id);
+      if(el && el.data) Plotly.Plots.resize(el);
+    }
+  });
+}
+document.getElementById("sideToggleBtn")?.addEventListener("click",()=>setSideCollapsed(true));
+document.getElementById("sideShowBtn")?.addEventListener("click",()=>setSideCollapsed(false));
+
+document.getElementById("eqmTabBtn").addEventListener("click",()=>setActiveTab("eqm"));
+document.getElementById("cqmTabBtn").addEventListener("click",()=>setActiveTab("cqm"));
+document.getElementById("curveTabBtn").addEventListener("click",()=>setActiveTab("curve"));
+document.getElementById("curveResetBtn")?.addEventListener("click",resetCurveToDefault);
+document.getElementById("curveLogToggle")?.addEventListener("change",e=>{
+  curveLogScale=!!e.target.checked;
+  scheduleCurveBacktest(0);
+});
+for(const id of ["curveStartInput"]){
+  document.addEventListener("focusin",e=>{
+    if(e.target.id===id){
+      setTimeout(()=>{ try{ e.target.select(); }catch(_){} },0);
+    }
+  });
+  document.addEventListener("input",e=>{
+    if(e.target.id===id){
+      const formatted=normalizeBacktestDateInput(e.target);
+      try{ e.target.setSelectionRange(formatted.length, formatted.length); }catch(_){}
+      if(formatted.length===10 && document.getElementById("curvePane")?.classList.contains("active")){
+        syncCurveDateControls();
+        scheduleCurveBacktest(0);
+      }
+    }
+  });
+  document.addEventListener("change",e=>{
+    if(e.target.id===id){
+      syncCurveDateControls();
+      scheduleCurveBacktest(0);
+    }
+  });
+  document.addEventListener("keydown",e=>{
+    if(e.target.id===id && e.key==="Enter"){
+      syncCurveDateControls();
+      scheduleCurveBacktest(0);
+    }
+  });
+}
+document.addEventListener("input",e=>{
+  if(e.target.id==="curveCashInput") scheduleCurveBacktest(0);
+});
+document.getElementById("legendToggle").addEventListener("change",e=>{
+  const chart=document.getElementById("chart");
+  if(chart && chart.data) Plotly.relayout(chart, {"showlegend": e.target.checked});
+});
+
+async function loadBtcDataAndRender(){
+  const st=document.getElementById("status");
+  const btn=document.getElementById("loadBtn");
+  try{
+    btn.disabled=true;
+    btn.textContent="Loading…";
+    setProgress(0,"Auto-loading live BTC data…");
+    // ChartInspect is the single source of truth for both price and
+    // indicators when its proxy is reachable -- price comes bundled with
+    // the same metric responses we need for Sharpe/Cost-Basis/Risk, so no
+    // separate price API call is required. Falls back to the free
+    // Bitstamp/Binance/CoinGecko chain only if the proxy is unavailable.
+    const proxyResult=await fetchOnchainMetricsFromProxy(setProgress);
+    onchainMetrics=proxyResult;
+    let data=null;
+    const priceEntries=(proxyResult && proxyResult.priceByMs) ? Object.entries(proxyResult.priceByMs) : [];
+    if(priceEntries.length){
+      data=priceEntries
+        .map(([ms,close])=>({t:new Date(Number(ms)), close:Number(close)}))
+        .filter(d=>isFinite(d.close)&&d.close>0)
+        .sort((a,b)=>a.t.getTime()-b.t.getTime());
+      setProgress(41,`Using ChartInspect price data — ${data.length.toLocaleString()} daily closes.`);
+    }else{
+      setProgress(22,"Falling back to free price sources…");
+      data=await fetchBtcData(setProgress);
+      setProgress(41,`Fetched ${data.length.toLocaleString()} live BTC daily closes.`);
+    }
+    const model=await buildModel(data,setProgress);
+    render(model);
+    setProgress(100,`Loaded ${data.length.toLocaleString()} daily candles.`);
+  }catch(err){
+    setProgress(0,"Error.");
+    st.innerHTML=`<span class="warn">${err.message}</span><div class="progressWrap"><div id="progressBar" class="progressBar"></div></div><div id="progressText" class="progressText">0%</div>`;
+    console.error(err);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Refresh BTC Data";
+  }
+}
+document.getElementById("loadBtn").onclick=loadBtcDataAndRender;
+// Force indicator checkboxes/weights to match INDICATOR_STATE (the JS source
+// of truth) rather than trusting the DOM's checked/value state at parse
+// time -- browsers can restore stale form field values on reload/back-
+// forward navigation, which would otherwise silently desync the UI from
+// the actual defaults defined above.
+for(const key of Object.keys(INDICATOR_STATE)){
+  const st=INDICATOR_STATE[key];
+  const toggleId = key==='onchainRisk' ? "indOnchainRiskToggle" : `ind${key[0].toUpperCase()}${key.slice(1)}Toggle`;
+  const weightId = key==='onchainRisk' ? "indOnchainRiskWeight" : `ind${key[0].toUpperCase()}${key.slice(1)}Weight`;
+  const toggleEl=document.getElementById(toggleId);
+  const weightEl=document.getElementById(weightId);
+  if(toggleEl) toggleEl.checked=st.enabled;
+  if(weightEl) weightEl.value=st.weight;
+}
+
+clearCurveResults("Fetch BTC data first.");
+// Auto-load live BTC data as soon as the page opens -- no manual click needed.
+// The button above still works afterward as a manual refresh.
+loadBtcDataAndRender();
+</script>
+</body>
+</html>
