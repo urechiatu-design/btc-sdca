@@ -2188,12 +2188,19 @@ document.getElementById("authSubmitBtn")?.addEventListener("click", async ()=>{
   btn.disabled = true;
   try{
     if(authMode==="signup"){
+      const referralCode = document.getElementById("authReferralCode").value.trim();
+      // Carry the referral code through the confirmation email link itself
+      // (?ref=...), not just localStorage -- localStorage on the signup tab
+      // can be lost (e.g. an incognito window closing) before the user comes
+      // back to redeem it. refreshGate()'s catch-up logic below checks both.
+      const redirectUrl = referralCode
+        ? `${window.location.origin}/?ref=${encodeURIComponent(referralCode)}`
+        : window.location.origin;
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
-        options:{ emailRedirectTo: window.location.origin }
+        options:{ emailRedirectTo: redirectUrl }
       });
       if(error) throw error;
-      const referralCode = document.getElementById("authReferralCode").value.trim();
       const accessToken = data?.session?.access_token;
       if(accessToken){
         await fetch("/api/signup-complete", {
@@ -2376,14 +2383,22 @@ async function refreshGate(){
       // this project's Supabase Auth settings, since signUp() doesn't
       // return a session until the user confirms their email (verified
       // directly against this project). Any referral code they entered at
-      // signup was stashed in localStorage for exactly this moment.
-      const pendingReferral = localStorage.getItem("btcSdcaPendingReferral") || "";
+      // signup was stashed in localStorage AND in the confirmation email's
+      // redirect URL (?ref=...) -- check both, since localStorage alone can
+      // be lost if the signup tab/window closes before they come back.
+      const urlParams = new URLSearchParams(window.location.search);
+      const pendingReferral = localStorage.getItem("btcSdcaPendingReferral") || urlParams.get("ref") || "";
       await fetch("/api/signup-complete", {
         method:"POST",
         headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${session.access_token}` },
         body: JSON.stringify({ referralCode: pendingReferral })
       }).catch(()=>{});
       localStorage.removeItem("btcSdcaPendingReferral");
+      if(urlParams.has("ref")){
+        urlParams.delete("ref");
+        const cleanQuery = urlParams.toString();
+        history.replaceState(null, "", window.location.pathname + (cleanQuery ? `?${cleanQuery}` : ""));
+      }
       const retry = await supabaseClient.from("profiles").select("subscription_status,trial_ends_at,price_tier").eq("id", session.user.id).single();
       if(!retry.error) profile = retry.data;
     }
