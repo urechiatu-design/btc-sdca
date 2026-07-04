@@ -2289,6 +2289,7 @@ document.getElementById("resetPasswordSubmitBtn")?.addEventListener("click", asy
     const { error } = await supabaseClient.auth.updateUser({ password });
     if(error) throw error;
     document.getElementById("resetPasswordInput").value = "";
+    inPasswordRecovery = false;
     await refreshGate();
   }catch(err){
     errEl.textContent = err.message || "Something went wrong.";
@@ -2382,11 +2383,17 @@ function showPaywallForStatus(profile){
 }
 
 let gateBusy = false;
+let inPasswordRecovery = false;
 async function refreshGate(){
   if(gateBusy) return; // onAuthStateChange + explicit calls can overlap; avoid duplicate concurrent runs
   gateBusy = true;
   try{
     const { data:{ session } } = await supabaseClient.auth.getSession();
+    // A PASSWORD_RECOVERY event can fire while this call is already
+    // in-flight (both start racing off page load) -- if it already
+    // switched us to the reset-password screen, don't let this call's
+    // stale in-progress read clobber it with the dashboard/paywall.
+    if(inPasswordRecovery) return;
     if(!session){
       setAuthMode("login");
       showScreen("auth");
@@ -2455,6 +2462,7 @@ async function initAppGate(){
     // else -- show that screen directly instead of routing them through
     // refreshGate()'s normal dashboard/paywall/login logic.
     if(event === "PASSWORD_RECOVERY"){
+      inPasswordRecovery = true;
       showScreen("resetPassword");
       return;
     }
