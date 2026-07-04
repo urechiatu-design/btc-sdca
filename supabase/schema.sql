@@ -201,3 +201,18 @@ values ('FOUNDER100', 100, 0, 90, 'founder', true);
 -- value any time directly in the table -- no code deploy needed.
 insert into public.app_config (key, value)
 values ('standard_trial_days', '0');
+
+-- ============================================================
+-- 9. Mobile billing (RevenueCat) -- run this section once when adding
+--    the iOS/Android apps. Mirrors stripe_customer_id/stripe_subscription_id
+--    below: a nullable per-provider identifier, never a foreign key to
+--    anything Stripe-specific, so a profile can be billed by either
+--    provider (or, transiently, migrate between them) without a schema
+--    change. api/revenuecat-webhook.js writes to these exactly like
+--    api/stripe-webhook.js writes to the Stripe columns -- both funnel
+--    into the same subscription_status enum, which is what makes
+--    entitlement checks (isEntitled() in index.html) provider-agnostic.
+-- ============================================================
+alter table public.profiles add column if not exists revenuecat_app_user_id text unique;
+alter table public.profiles add column if not exists billing_provider text
+  check (billing_provider in ('stripe', 'revenuecat'));

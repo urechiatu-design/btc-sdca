@@ -2,3 +2,16 @@
 node_modules
 .env
 .env.local
+
+# Capacitor build artifact -- index.html is the source of truth, this is
+# just a copy-target for `cap sync` (see scripts/copy-www.js)
+www/
+
+# Native build outputs (ios/ and android/ project folders themselves ARE
+# committed -- they contain manifest/icon config, not just generated output)
+ios/App/Pods/
+ios/App/App.xcworkspace/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties

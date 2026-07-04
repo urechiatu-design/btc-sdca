@@ -19,6 +19,7 @@ const { getVerifiedUser } = require("./_auth");
 const { getSupabaseAdmin } = require("./_supabaseAdmin");
 
 module.exports = async function handler(req, res) {
+  if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed." });
   }

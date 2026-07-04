@@ -15,6 +15,7 @@ const { getSupabaseAdmin } = require("./_supabaseAdmin");
 const { getStripe, PRICE_IDS } = require("./_stripe");
 
 module.exports = async function handler(req, res) {
+  if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed." });
   }

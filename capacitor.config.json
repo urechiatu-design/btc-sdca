@@ -1,0 +1,8 @@
+{
+  "appId": "com.btcsdca.app",
+  "appName": "BTC SDCA",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

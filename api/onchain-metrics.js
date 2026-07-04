@@ -125,6 +125,7 @@ function mergePriceByMs(target, rows) {
 let cache = { at: 0, body: null };
 
 module.exports = async function handler(req, res) {
+  if (req.method === "OPTIONS") return res.status(204).end();
   try {
     if (cache.body && Date.now() - cache.at < CACHE_MS) {
       res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=1800");
