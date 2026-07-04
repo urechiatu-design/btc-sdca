@@ -2,6 +2,18 @@
   "functions": {
     "api/onchain-metrics.js": {
       "maxDuration": 30
+    },
+    "api/signup-complete.js": {
+      "maxDuration": 10
+    },
+    "api/create-checkout-session.js": {
+      "maxDuration": 10
+    },
+    "api/create-portal-session.js": {
+      "maxDuration": 10
+    },
+    "api/stripe-webhook.js": {
+      "maxDuration": 10
     }
   }
 }

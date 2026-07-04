@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>BTC SDCA</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -173,9 +174,28 @@ body.sideCollapsed .tabbar{padding-left:8px}
   .cqmBadges{gap:6px}
   .cqmBadge{font-size:11px;padding:3px 8px}
 }
+
+/* ---- Auth / verify-email / paywall screens ---- */
+.authWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.authCard{width:100%;max-width:380px}
+.authCard h2{margin:0 0 4px;font-size:19px;color:#fff;font-weight:700}
+.authCard .sub{margin:0 0 18px;color:var(--muted);font-size:12.5px;line-height:1.5}
+.authField{margin-bottom:2px}
+.authError{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:1px}
+.authSwitch{margin-top:12px;text-align:center;font-size:12.5px;color:var(--muted)}
+.authSwitch a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
+.authSwitch a:hover{text-decoration:underline}
+.accountChip{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex:0 0 auto}
+.accountLinkBtn{width:auto;padding:6px 10px;margin:0;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:600;box-shadow:none}
+.accountLinkBtn:hover{color:#ddd2ec;border-color:#3a2e4d}
+@media(max-width:600px){
+  .accountChip{flex-wrap:wrap;justify-content:flex-end;gap:6px}
+  .accountEmail{display:none}
+}
 </style>
 </head>
 <body>
+<div id="appShell" style="display:none">
 <header>
 <div class="brandRow">
   <div class="brandMark">₿</div>
@@ -184,7 +204,14 @@ body.sideCollapsed .tabbar{padding-left:8px}
     <div class="headSub">Systematic DCA · on-chain &amp; price valuation model</div>
   </div>
 </div>
-<div class="liveBadge"><span class="liveDot"></span>Live</div>
+<div style="display:flex;align-items:center;gap:14px">
+  <div class="liveBadge"><span class="liveDot"></span>Live</div>
+  <div id="accountChip" class="accountChip" style="display:none">
+    <span id="accountEmail" class="accountEmail"></span>
+    <button id="manageBillingBtn" type="button" class="accountLinkBtn">Manage billing</button>
+    <button id="logoutBtn" type="button" class="accountLinkBtn">Log out</button>
+  </div>
+</div>
 </header>
 <div class="wrap">
 <aside class="side">
@@ -355,8 +382,65 @@ body.sideCollapsed .tabbar{padding-left:8px}
 
 </main>
 </div>
+</div>
+
+<div id="authScreen" class="authWrap" style="display:none">
+  <div class="card authCard">
+    <div class="brandRow" style="margin-bottom:16px">
+      <div class="brandMark">₿</div>
+      <h1 style="font-size:17px">BTC SDCA</h1>
+    </div>
+    <h2 id="authTitle">Log in</h2>
+    <div class="sub" id="authSub">Welcome back.</div>
+    <div class="authField">
+      <label>Email</label>
+      <input id="authEmail" type="email" autocomplete="email"/>
+    </div>
+    <div class="authField">
+      <label>Password</label>
+      <input id="authPassword" type="password" autocomplete="current-password"/>
+    </div>
+    <div class="authField" id="authReferralField" style="display:none">
+      <label>Referral code (optional)</label>
+      <input id="authReferralCode" type="text" autocomplete="off" placeholder="e.g. FOUNDER100"/>
+    </div>
+    <button id="authSubmitBtn" type="button" style="margin-top:10px">Log In</button>
+    <div id="authError" class="authError"></div>
+    <div class="authSwitch">
+      <span id="authSwitchText">Don't have an account? <a id="authSwitchLink">Sign up</a></span>
+    </div>
+    <div class="authSwitch"><a id="authForgotLink">Forgot password?</a></div>
+  </div>
+</div>
+
+<div id="verifyEmailScreen" class="authWrap" style="display:none">
+  <div class="card authCard">
+    <h2>Check your inbox</h2>
+    <div class="sub">We've sent a confirmation link to <b id="verifyEmailAddress"></b>. Click it to activate your account, then come back to this tab.</div>
+    <button id="resendVerifyBtn" type="button">Resend email</button>
+    <div id="verifyError" class="authError"></div>
+    <div class="authSwitch"><a id="verifyLogoutLink">Log out</a></div>
+  </div>
+</div>
+
+<div id="paywallScreen" class="authWrap" style="display:none">
+  <div class="card authCard">
+    <h2 id="paywallTitle">Your free trial has ended</h2>
+    <div class="sub" id="paywallSub">Subscribe to keep access to BTC SDCA.</div>
+    <button id="paywallSubscribeBtn" type="button">Subscribe</button>
+    <div id="paywallError" class="authError"></div>
+    <div class="authSwitch"><a id="paywallLogoutLink">Log out</a></div>
+  </div>
+</div>
 
 <script>
+// ---- Supabase project connection (public-safe values, same as any
+// client-side API key -- the anon key only ever works within the bounds
+// of the Row Level Security policies defined in supabase/schema.sql) ----
+const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co"; // TODO: replace with your Supabase project URL
+const SUPABASE_ANON_KEY = "YOUR-ANON-PUBLIC-KEY"; // TODO: replace with your Supabase anon/public key
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const GENESIS = Date.UTC(2009,0,3);
 const ONE_DAY = 86400000;
 const HALVINGS = [
@@ -2044,9 +2128,270 @@ for(const key of Object.keys(INDICATOR_STATE)){
 }
 
 clearCurveResults("Fetch BTC data first.");
-// Auto-load live BTC data as soon as the page opens -- no manual click needed.
-// The button above still works afterward as a manual refresh.
-loadBtcDataAndRender();
+
+// ---------------------------------------------------------------
+// Auth + subscription gating. Shows exactly one of four screens
+// (#authScreen, #verifyEmailScreen, #paywallScreen, #appShell) based on
+// Supabase session state and the caller's own `profiles` row (readable
+// under RLS -- see supabase/schema.sql). loadBtcDataAndRender() itself
+// (defined above, unchanged) is only ever called once entitlement is
+// confirmed, and only once per page load.
+// ---------------------------------------------------------------
+let authMode = "login"; // "login" | "signup"
+
+function showScreen(name){
+  const ids = { app:"appShell", auth:"authScreen", verify:"verifyEmailScreen", paywall:"paywallScreen" };
+  for(const key of Object.keys(ids)){
+    const el = document.getElementById(ids[key]);
+    if(el) el.style.display = (key===name) ? (key==="app" ? "block" : "flex") : "none";
+  }
+  const chip = document.getElementById("accountChip");
+  if(chip) chip.style.display = (name==="app") ? "flex" : "none";
+}
+
+function wireAuthSwitchLink(){
+  document.getElementById("authSwitchLink")?.addEventListener("click", ()=>setAuthMode(authMode==="signup"?"login":"signup"));
+}
+
+function setAuthMode(mode){
+  authMode = mode;
+  const title = document.getElementById("authTitle");
+  const sub = document.getElementById("authSub");
+  const submitBtn = document.getElementById("authSubmitBtn");
+  const refField = document.getElementById("authReferralField");
+  const switchText = document.getElementById("authSwitchText");
+  if(mode==="signup"){
+    title.textContent = "Create your account";
+    sub.textContent = "Start your free trial.";
+    submitBtn.textContent = "Sign Up";
+    refField.style.display = "block";
+    switchText.innerHTML = 'Already have an account? <a id="authSwitchLink">Log in</a>';
+  }else{
+    title.textContent = "Log in";
+    sub.textContent = "Welcome back.";
+    submitBtn.textContent = "Log In";
+    refField.style.display = "none";
+    switchText.innerHTML = 'Don&#39;t have an account? <a id="authSwitchLink">Sign up</a>';
+  }
+  document.getElementById("authError").textContent = "";
+  wireAuthSwitchLink();
+}
+
+document.getElementById("authSubmitBtn")?.addEventListener("click", async ()=>{
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const errEl = document.getElementById("authError");
+  errEl.style.color = "";
+  errEl.textContent = "";
+  if(!email || !password){ errEl.textContent = "Enter your email and password."; return; }
+  const btn = document.getElementById("authSubmitBtn");
+  btn.disabled = true;
+  try{
+    if(authMode==="signup"){
+      const { data, error } = await supabaseClient.auth.signUp({
+        email, password,
+        options:{ emailRedirectTo: window.location.origin }
+      });
+      if(error) throw error;
+      const referralCode = document.getElementById("authReferralCode").value.trim();
+      const accessToken = data?.session?.access_token;
+      if(accessToken){
+        await fetch("/api/signup-complete", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${accessToken}` },
+          body: JSON.stringify({ referralCode })
+        }).catch(()=>{}); // best-effort -- refreshGate()'s catch-up logic below covers a missed call
+      }
+      await refreshGate();
+    }else{
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      await refreshGate();
+    }
+  }catch(err){
+    errEl.textContent = err.message || "Something went wrong.";
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("authForgotLink")?.addEventListener("click", async ()=>{
+  const email = document.getElementById("authEmail").value.trim();
+  const errEl = document.getElementById("authError");
+  errEl.style.color = "";
+  if(!email){ errEl.textContent = "Enter your email above first, then click Forgot password."; return; }
+  errEl.textContent = "";
+  try{
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if(error) throw error;
+    errEl.style.color = "var(--good)";
+    errEl.textContent = "Password reset email sent.";
+  }catch(err){
+    errEl.style.color = "";
+    errEl.textContent = err.message || "Something went wrong.";
+  }
+});
+
+document.getElementById("resendVerifyBtn")?.addEventListener("click", async ()=>{
+  const email = document.getElementById("verifyEmailAddress").textContent;
+  const errEl = document.getElementById("verifyError");
+  errEl.style.color = "";
+  errEl.textContent = "";
+  try{
+    const { error } = await supabaseClient.auth.resend({ type:"signup", email });
+    if(error) throw error;
+    errEl.style.color = "var(--good)";
+    errEl.textContent = "Verification email resent.";
+  }catch(err){
+    errEl.style.color = "";
+    errEl.textContent = err.message || "Something went wrong.";
+  }
+});
+
+async function doLogout(){
+  await supabaseClient.auth.signOut();
+  await refreshGate();
+}
+document.getElementById("logoutBtn")?.addEventListener("click", doLogout);
+document.getElementById("verifyLogoutLink")?.addEventListener("click", doLogout);
+document.getElementById("paywallLogoutLink")?.addEventListener("click", doLogout);
+
+document.getElementById("manageBillingBtn")?.addEventListener("click", async ()=>{
+  try{
+    const { data:{ session } } = await supabaseClient.auth.getSession();
+    if(!session) return;
+    const res = await fetch("/api/create-portal-session", {
+      method:"POST",
+      headers:{ "Authorization":`Bearer ${session.access_token}` }
+    });
+    const json = await res.json();
+    if(json.success && json.url) window.location = json.url;
+    else console.error("create-portal-session failed:", json.error);
+  }catch(err){ console.error(err); }
+});
+
+document.getElementById("paywallSubscribeBtn")?.addEventListener("click", async ()=>{
+  const btn = document.getElementById("paywallSubscribeBtn");
+  const errEl = document.getElementById("paywallError");
+  // past_due users already have a subscription -- send them to the
+  // billing portal to fix payment, not to a brand-new Checkout Session.
+  const endpoint = btn.dataset.action === "portal" ? "/api/create-portal-session" : "/api/create-checkout-session";
+  const originalLabel = btn.textContent;
+  errEl.textContent = "";
+  btn.disabled = true;
+  btn.textContent = "Redirecting…";
+  try{
+    const { data:{ session } } = await supabaseClient.auth.getSession();
+    if(!session) throw new Error("Not logged in.");
+    const res = await fetch(endpoint, {
+      method:"POST",
+      headers:{ "Authorization":`Bearer ${session.access_token}` }
+    });
+    const json = await res.json();
+    if(!json.success || !json.url) throw new Error(json.error || "Could not start checkout.");
+    window.location = json.url;
+  }catch(err){
+    errEl.textContent = err.message || "Something went wrong.";
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+});
+
+function isEntitled(profile){
+  if(!profile) return false;
+  if(profile.subscription_status === "active") return true;
+  if(profile.subscription_status === "trialing" && profile.trial_ends_at){
+    return new Date(profile.trial_ends_at).getTime() > Date.now();
+  }
+  return false;
+}
+
+function showPaywallForStatus(profile){
+  const title = document.getElementById("paywallTitle");
+  const sub = document.getElementById("paywallSub");
+  const btn = document.getElementById("paywallSubscribeBtn");
+  const status = profile?.subscription_status;
+  if(status === "past_due"){
+    title.textContent = "Your last payment failed";
+    sub.textContent = "Update your payment method to restore access.";
+    btn.textContent = "Update Payment Method";
+    btn.dataset.action = "portal";
+  }else if(status === "canceled"){
+    title.textContent = "Your subscription has ended";
+    sub.textContent = "Subscribe again to keep access to BTC SDCA.";
+    btn.textContent = "Subscribe";
+    btn.dataset.action = "checkout";
+  }else{
+    title.textContent = "Your free trial has ended";
+    sub.textContent = "Subscribe to keep access to BTC SDCA.";
+    btn.textContent = "Subscribe";
+    btn.dataset.action = "checkout";
+  }
+  showScreen("paywall");
+}
+
+let gateBusy = false;
+async function refreshGate(){
+  if(gateBusy) return; // onAuthStateChange + explicit calls can overlap; avoid duplicate concurrent runs
+  gateBusy = true;
+  try{
+    const { data:{ session } } = await supabaseClient.auth.getSession();
+    if(!session){
+      setAuthMode("login");
+      showScreen("auth");
+      return;
+    }
+    if(!session.user.email_confirmed_at){
+      document.getElementById("verifyEmailAddress").textContent = session.user.email;
+      showScreen("verify");
+      return;
+    }
+    let { data:profile, error } = await supabaseClient
+      .from("profiles")
+      .select("subscription_status,trial_ends_at,price_tier")
+      .eq("id", session.user.id)
+      .single();
+    if(error){
+      console.error("Failed to load profile:", error);
+      showScreen("auth");
+      return;
+    }
+    if(profile && profile.price_tier == null){
+      // signup-complete.js hasn't run yet for this account (e.g. the
+      // signup request was interrupted, or this Supabase project's
+      // settings don't return a session until after email confirmation).
+      // Finish it now -- without a referral code, since it's no longer
+      // available at this point; this only affects that rare edge case.
+      await fetch("/api/signup-complete", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${session.access_token}` },
+        body: JSON.stringify({})
+      }).catch(()=>{});
+      const retry = await supabaseClient.from("profiles").select("subscription_status,trial_ends_at,price_tier").eq("id", session.user.id).single();
+      if(!retry.error) profile = retry.data;
+    }
+    const chipEmail = document.getElementById("accountEmail");
+    if(chipEmail) chipEmail.textContent = session.user.email;
+    if(isEntitled(profile)){
+      showScreen("app");
+      if(!window.__btcSdcaLoaded){
+        window.__btcSdcaLoaded = true;
+        loadBtcDataAndRender();
+      }
+    }else{
+      showPaywallForStatus(profile);
+    }
+  } finally {
+    gateBusy = false;
+  }
+}
+
+async function initAppGate(){
+  setAuthMode("login");
+  supabaseClient.auth.onAuthStateChange(()=>{ refreshGate(); });
+  await refreshGate();
+}
+initAppGate();
 </script>
 </body>
 </html>
