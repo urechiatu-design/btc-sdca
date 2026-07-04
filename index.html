@@ -433,6 +433,19 @@ body.sideCollapsed .tabbar{padding-left:8px}
   </div>
 </div>
 
+<div id="resetPasswordScreen" class="authWrap" style="display:none">
+  <div class="card authCard">
+    <h2>Set a new password</h2>
+    <div class="sub">Choose a new password for your account.</div>
+    <div class="authField">
+      <label>New password</label>
+      <input id="resetPasswordInput" type="password" autocomplete="new-password"/>
+    </div>
+    <button id="resetPasswordSubmitBtn" type="button">Set password</button>
+    <div id="resetPasswordError" class="authError"></div>
+  </div>
+</div>
+
 <script>
 // ---- Supabase project connection (public-safe values, same as any
 // client-side API key -- the anon key only ever works within the bounds
@@ -2140,7 +2153,7 @@ clearCurveResults("Fetch BTC data first.");
 let authMode = "login"; // "login" | "signup"
 
 function showScreen(name){
-  const ids = { app:"appShell", auth:"authScreen", verify:"verifyEmailScreen", paywall:"paywallScreen" };
+  const ids = { app:"appShell", auth:"authScreen", verify:"verifyEmailScreen", paywall:"paywallScreen", resetPassword:"resetPasswordScreen" };
   for(const key of Object.keys(ids)){
     const el = document.getElementById(ids[key]);
     if(el) el.style.display = (key===name) ? (key==="app" ? "block" : "flex") : "none";
@@ -2262,6 +2275,22 @@ document.getElementById("resendVerifyBtn")?.addEventListener("click", async ()=>
     errEl.textContent = "Verification email resent.";
   }catch(err){
     errEl.style.color = "";
+    errEl.textContent = err.message || "Something went wrong.";
+  }
+});
+
+document.getElementById("resetPasswordSubmitBtn")?.addEventListener("click", async ()=>{
+  const password = document.getElementById("resetPasswordInput").value;
+  const errEl = document.getElementById("resetPasswordError");
+  errEl.style.color = "";
+  errEl.textContent = "";
+  if(!password || password.length < 6){ errEl.textContent = "Password must be at least 6 characters."; return; }
+  try{
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if(error) throw error;
+    document.getElementById("resetPasswordInput").value = "";
+    await refreshGate();
+  }catch(err){
     errEl.textContent = err.message || "Something went wrong.";
   }
 });
@@ -2420,7 +2449,17 @@ async function refreshGate(){
 
 async function initAppGate(){
   setAuthMode("login");
-  supabaseClient.auth.onAuthStateChange(()=>{ refreshGate(); });
+  supabaseClient.auth.onAuthStateChange((event)=>{
+    // A password-reset link lands here as a real session, but the user
+    // still needs to actually set a new password before going anywhere
+    // else -- show that screen directly instead of routing them through
+    // refreshGate()'s normal dashboard/paywall/login logic.
+    if(event === "PASSWORD_RECOVERY"){
+      showScreen("resetPassword");
+      return;
+    }
+    refreshGate();
+  });
   await refreshGate();
 }
 initAppGate();
