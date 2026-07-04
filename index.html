@@ -437,8 +437,8 @@ body.sideCollapsed .tabbar{padding-left:8px}
 // ---- Supabase project connection (public-safe values, same as any
 // client-side API key -- the anon key only ever works within the bounds
 // of the Row Level Security policies defined in supabase/schema.sql) ----
-const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co"; // TODO: replace with your Supabase project URL
-const SUPABASE_ANON_KEY = "YOUR-ANON-PUBLIC-KEY"; // TODO: replace with your Supabase anon/public key
+const SUPABASE_URL = "https://bswzjmngwclirtnpgehx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_CgWvwmNJqaUBRFUNBguFuw_K0TUZ_Ut";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const GENESIS = Date.UTC(2009,0,3);
@@ -2201,8 +2201,19 @@ document.getElementById("authSubmitBtn")?.addEventListener("click", async ()=>{
           headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${accessToken}` },
           body: JSON.stringify({ referralCode })
         }).catch(()=>{}); // best-effort -- refreshGate()'s catch-up logic below covers a missed call
+        await refreshGate();
+      }else{
+        // This Supabase project doesn't issue a session until the email is
+        // confirmed (a common "Confirm email" setting -- confirmed true for
+        // this project via a direct signUp() test: hasSession was false).
+        // There's no access token yet to redeem the referral code with, so
+        // stash it for refreshGate()'s catch-up logic to pick up once the
+        // user returns with a confirmed session, and show the verify
+        // screen directly using the email they just typed.
+        if(referralCode) localStorage.setItem("btcSdcaPendingReferral", referralCode);
+        document.getElementById("verifyEmailAddress").textContent = email;
+        showScreen("verify");
       }
-      await refreshGate();
     }else{
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if(error) throw error;
@@ -2357,16 +2368,18 @@ async function refreshGate(){
       return;
     }
     if(profile && profile.price_tier == null){
-      // signup-complete.js hasn't run yet for this account (e.g. the
-      // signup request was interrupted, or this Supabase project's
-      // settings don't return a session until after email confirmation).
-      // Finish it now -- without a referral code, since it's no longer
-      // available at this point; this only affects that rare edge case.
+      // signup-complete.js hasn't run yet for this account -- normal for
+      // this project's Supabase Auth settings, since signUp() doesn't
+      // return a session until the user confirms their email (verified
+      // directly against this project). Any referral code they entered at
+      // signup was stashed in localStorage for exactly this moment.
+      const pendingReferral = localStorage.getItem("btcSdcaPendingReferral") || "";
       await fetch("/api/signup-complete", {
         method:"POST",
         headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${session.access_token}` },
-        body: JSON.stringify({})
+        body: JSON.stringify({ referralCode: pendingReferral })
       }).catch(()=>{});
+      localStorage.removeItem("btcSdcaPendingReferral");
       const retry = await supabaseClient.from("profiles").select("subscription_status,trial_ends_at,price_tier").eq("id", session.user.id).single();
       if(!retry.error) profile = retry.data;
     }
