@@ -2,7 +2,15 @@
 // supabase.auth.signUp(). Finishes account setup server-side: redeems a
 // referral code if one was submitted (via the atomic redeem_referral_code
 // RPC, defined in supabase/schema.sql), or otherwise places the user on
-// the standard tier per the app_config.standard_trial_days knob.
+// the standard tier.
+//
+// This ONLY resolves price_tier / referral_code_used / is_founder --
+// subscription_status stays 'incomplete' (the table default) until the
+// user actually completes Stripe Checkout, since the trial itself is now
+// Stripe-native (subscription_data.trial_period_days, started at Checkout
+// time so the card-collection + trial-clock-start happen together, not
+// tracked separately in Postgres). See api/create-checkout-session.js for
+// where trial_period_days actually gets applied.
 //
 // The acting user is always derived from the caller's verified access
 // token (api/_auth.js) -- never from a client-supplied user id -- so a
@@ -34,43 +42,19 @@ module.exports = async function handler(req, res) {
       });
       if (error) throw error;
       if (data && data.success) {
-        return res.status(200).json({
-          success: true,
-          isFounder: true,
-          trialEndsAt: data.trial_ends_at,
-        });
+        return res.status(200).json({ success: true, isFounder: true });
       }
       // Code invalid/exhausted -- fall through to the standard path below
       // rather than failing the whole signup over a promo code.
     }
 
-    const { data: configRow, error: configError } = await supabaseAdmin
-      .from("app_config")
-      .select("value")
-      .eq("key", "standard_trial_days")
-      .single();
-    if (configError) throw configError;
-
-    const standardTrialDays = Number(configRow?.value) || 0;
-    const trialEndsAt = standardTrialDays > 0
-      ? new Date(Date.now() + standardTrialDays * 24 * 60 * 60 * 1000).toISOString()
-      : null;
-
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({
-        price_tier: "standard",
-        subscription_status: standardTrialDays > 0 ? "trialing" : "incomplete",
-        trial_ends_at: trialEndsAt,
-      })
+      .update({ price_tier: "standard" })
       .eq("id", user.id);
     if (updateError) throw updateError;
 
-    return res.status(200).json({
-      success: true,
-      isFounder: false,
-      trialEndsAt,
-    });
+    return res.status(200).json({ success: true, isFounder: false });
   } catch (err) {
     console.error("signup-complete error:", err);
     return res.status(500).json({ success: false, error: String(err.message || err) });

@@ -143,7 +143,6 @@ as $$
 declare
   v_row referral_codes%rowtype;
   v_redemption_number int;
-  v_trial_ends timestamptz;
 begin
   -- Atomic claim: this single UPDATE...WHERE is where the race-safety
   -- comes from. Two concurrent callers serialize on Postgres's row-level
@@ -162,23 +161,24 @@ begin
   end if;
 
   v_redemption_number := v_row.redemptions_count;
-  v_trial_ends := now() + (v_row.trial_days || ' days')::interval;
 
   insert into referral_redemptions (user_id, code, redemption_number)
   values (p_user_id, v_row.code, v_redemption_number);
 
+  -- subscription_status stays 'incomplete' here -- the trial itself is
+  -- Stripe-native (subscription_data.trial_period_days, applied in
+  -- api/create-checkout-session.js) and only actually starts once the
+  -- user completes Checkout and Stripe's webhook confirms it, so it
+  -- would be wrong to mark them 'trialing' before that's happened.
   update profiles
      set referral_code_used = v_row.code,
          is_founder = true,
-         price_tier = v_row.grants_price_tier,
-         subscription_status = 'trialing',
-         trial_ends_at = v_trial_ends
+         price_tier = v_row.grants_price_tier
    where id = p_user_id;
 
   return jsonb_build_object(
     'success', true,
-    'redemption_number', v_redemption_number,
-    'trial_ends_at', v_trial_ends
+    'redemption_number', v_redemption_number
   );
 end;
 $$;

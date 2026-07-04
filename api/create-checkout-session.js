@@ -1,7 +1,15 @@
-// Called from the paywall screen's "Subscribe" button. The price tier is
-// always derived from the caller's own profiles row (never from a
-// client-supplied value), so a user cannot request the founder price for
-// themselves by tampering with a request body.
+// Called from the paywall/start-trial screen's button. The price tier
+// (and trial length, if any) are always derived from the caller's own
+// profiles row server-side -- never from a client-supplied value -- so a
+// user cannot request the founder price or a trial for themselves by
+// tampering with a request body.
+//
+// Trial handling is Stripe-native: subscription_data.trial_period_days is
+// a stable, GA Checkout parameter (no preview API version or account
+// billing-mode migration needed) that starts the trial clock at the same
+// moment the card is collected, and Stripe auto-bills automatically once
+// it elapses -- see api/stripe-webhook.js for how that sync flows back
+// into profiles.subscription_status.
 const { getVerifiedUser } = require("./_auth");
 const { getSupabaseAdmin } = require("./_supabaseAdmin");
 const { getStripe, PRICE_IDS } = require("./_stripe");
@@ -20,7 +28,7 @@ module.exports = async function handler(req, res) {
     const supabaseAdmin = getSupabaseAdmin();
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("price_tier, stripe_customer_id")
+      .select("price_tier, stripe_customer_id, stripe_subscription_id, referral_code_used")
       .eq("id", user.id)
       .single();
     if (profileError) throw profileError;
@@ -29,6 +37,28 @@ module.exports = async function handler(req, res) {
     const priceId = PRICE_IDS[tier];
     if (!priceId) {
       throw new Error(`Server misconfigured: no Stripe price configured for tier "${tier}".`);
+    }
+
+    // Trial only applies to a user's FIRST-ever subscription -- someone
+    // who already had one (and canceled, or fell past_due) doesn't get a
+    // second free trial just by resubscribing.
+    let trialDays = 0;
+    if (!profile?.stripe_subscription_id) {
+      if (profile?.referral_code_used) {
+        const { data: codeRow } = await supabaseAdmin
+          .from("referral_codes")
+          .select("trial_days")
+          .eq("code", profile.referral_code_used)
+          .single();
+        trialDays = Number(codeRow?.trial_days) || 0;
+      } else {
+        const { data: configRow } = await supabaseAdmin
+          .from("app_config")
+          .select("value")
+          .eq("key", "standard_trial_days")
+          .single();
+        trialDays = Number(configRow?.value) || 0;
+      }
     }
 
     const stripe = getStripe();
@@ -56,6 +86,7 @@ module.exports = async function handler(req, res) {
       client_reference_id: user.id,
       subscription_data: {
         metadata: { supabase_user_id: user.id },
+        ...(trialDays > 0 ? { trial_period_days: trialDays } : {}),
       },
     });
 

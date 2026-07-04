@@ -2310,11 +2310,11 @@ document.getElementById("paywallSubscribeBtn")?.addEventListener("click", async 
 
 function isEntitled(profile){
   if(!profile) return false;
-  if(profile.subscription_status === "active") return true;
-  if(profile.subscription_status === "trialing" && profile.trial_ends_at){
-    return new Date(profile.trial_ends_at).getTime() > Date.now();
-  }
-  return false;
+  // Stripe (via webhook, api/stripe-webhook.js) is the sole source of
+  // truth for both statuses now that the trial itself is Stripe-native --
+  // "trialing" here always means an active Stripe trial subscription,
+  // never a Postgres-tracked date, so no separate trial_ends_at check.
+  return profile.subscription_status === "active" || profile.subscription_status === "trialing";
 }
 
 function showPaywallForStatus(profile){
@@ -2333,9 +2333,13 @@ function showPaywallForStatus(profile){
     btn.textContent = "Subscribe";
     btn.dataset.action = "checkout";
   }else{
-    title.textContent = "Your free trial has ended";
-    sub.textContent = "Subscribe to keep access to BTC SDCA.";
-    btn.textContent = "Subscribe";
+    // 'incomplete' -- brand new account, never been through Checkout yet.
+    // create-checkout-session.js resolves whether they get a free trial
+    // (founder or standard) automatically; the copy here stays generic
+    // since the client doesn't need to know the exact trial length.
+    title.textContent = "Activate your account";
+    sub.textContent = "Add a payment method to get started. If you're eligible for a free trial, it starts today and you won't be charged until it ends.";
+    btn.textContent = "Continue";
     btn.dataset.action = "checkout";
   }
   showScreen("paywall");
