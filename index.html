@@ -2409,6 +2409,7 @@ async function refreshGate(){
       .select("subscription_status,trial_ends_at,price_tier")
       .eq("id", session.user.id)
       .single();
+    if(inPasswordRecovery) return; // re-check -- the network round-trip above is another window for the race described above
     if(error){
       console.error("Failed to load profile:", error);
       showScreen("auth");
@@ -2438,6 +2439,7 @@ async function refreshGate(){
       const retry = await supabaseClient.from("profiles").select("subscription_status,trial_ends_at,price_tier").eq("id", session.user.id).single();
       if(!retry.error) profile = retry.data;
     }
+    if(inPasswordRecovery) return; // final catch-all right before the screen actually gets decided
     const chipEmail = document.getElementById("accountEmail");
     if(chipEmail) chipEmail.textContent = session.user.email;
     if(isEntitled(profile)){
