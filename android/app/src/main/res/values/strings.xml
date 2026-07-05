@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BTC SDCA</string>
+    <string name="title_activity_main">BTC SDCA</string>
+    <string name="package_name">com.btcsdca.app</string>
+    <string name="custom_url_scheme">com.btcsdca.app</string>
+</resources>
